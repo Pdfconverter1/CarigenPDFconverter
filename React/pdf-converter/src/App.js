@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import axios from 'axios';
+import { BrowserRouter } from 'react-router-dom';
 import './styles.css';
 
 function FolderToExcelConverter() {
@@ -64,30 +65,32 @@ function FolderToExcelConverter() {
     };
 
     return (
-        <div className="container">
-        <div className="logo-container">
-            <img src="logo.png" alt="Logo" style={{ maxWidth: '100%', maxHeight: '100%' }} />
-        </div>
-        <h2>Select a Folder Containing PDFs</h2>
-        <label htmlFor="folderInput">Choose Folder</label>
-        <input 
-            id="folderInput"
-            type="file" 
-            webkitdirectory="true" 
-            onChange={handleFolderChange}
-        />
-        <button 
-            onClick={convertFolderToExcel} 
-            disabled={loading || pdfFiles.length === 0}>
-            {loading ? "Converting..." : "Convert to Excel"}
-        </button>
-        {loading && <div className="loader"></div>} {/* Show loader when loading */}
-        <div className="status">
-            {pdfFiles.length > 0 
-                ? `${pdfFiles.length} PDF(s) selected.` 
-                : "No files selected."}
-        </div>
-    </div>
+        <BrowserRouter basename={process.env.PUBLIC_URL}>
+            <div className="container">
+                <div className="logo-container">
+                    <img src="logo.png" alt="Logo" style={{ maxWidth: '100%', maxHeight: '100%' }} />
+                </div>
+                <h2>Select a Folder Containing PDFs</h2>
+                <label htmlFor="folderInput">Choose Folder</label>
+                <input
+                    id="folderInput"
+                    type="file"
+                    webkitdirectory="true"
+                    onChange={handleFolderChange}
+                />
+                <button
+                    onClick={convertFolderToExcel}
+                    disabled={loading || pdfFiles.length === 0}>
+                    {loading ? "Converting..." : "Convert to Excel"}
+                </button>
+                {loading && <div className="loader"></div>} {/* Show loader when loading */}
+                <div className="status">
+                    {pdfFiles.length > 0
+                        ? `${pdfFiles.length} PDF(s) selected.`
+                        : "No files selected."}
+                </div>
+            </div>
+        </BrowserRouter>
     );
 }
 

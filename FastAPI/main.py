@@ -10,7 +10,7 @@ import re
 
 app = FastAPI()
 
-origins = ['http://localhost:3000']
+origins = ['http://localhost:3000',"https://pdfconverter1.github.io/CarigenPDFconverter/"]
 
 app.add_middleware(
     CORSMiddleware,

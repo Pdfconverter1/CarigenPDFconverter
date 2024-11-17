@@ -1,0 +1,113 @@
+/* General Reset */
+body {
+    margin: 0;
+    padding: 0;
+    font-family: 'Arial', sans-serif;
+    background-color: #f0f4f8; /* Soft light blue */
+    color: #333; /* Neutral dark text */
+}
+
+/* Container */
+.container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    text-align: center;
+    padding: 1rem;
+}
+
+/* Logo Section */
+.logo-container {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    width: 248px;
+    height: 100px;
+    /*background-color: #ffffff; /* White background */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    /*border: 1px solid #ddd; /* Subtle border */
+    border-radius: 8px;
+    /*box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Soft shadow */
+}
+
+/* Heading Style */
+h2 {
+    font-size: 1.8rem;
+    margin-bottom: 1rem;
+    color: #444; /* Softer dark text */
+}
+
+/* Input Style */
+input[type="file"] {
+    display: none; /* Hide the default file input */
+}
+
+label {
+    display: inline-block;
+    background-color: #5a9; /* Soft green */
+    color: #fff;
+    padding: 0.75rem 1.5rem;
+    font-size: 1rem;
+    border-radius: 5px;
+    cursor: pointer;
+    margin-bottom: 1rem;
+    transition: background-color 0.3s ease;
+    text-decoration: none;
+}
+
+label:hover {
+    background-color: #488; /* Slightly darker green */
+}
+
+/* Button Style */
+button {
+    background-color: #4b7bec; /* Light blue */
+    color: #fff;
+    border: none;
+    padding: 0.75rem 1.5rem;
+    font-size: 1rem;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    margin-top: 1rem;
+}
+
+button:hover {
+    background-color: #3b5998; /* Slightly darker blue */
+}
+
+button:disabled {
+    background-color: #a5bcd9; /* Light gray-blue for disabled state */
+    cursor: not-allowed;
+}
+
+/* Loader Style */
+.loader {
+    border: 6px solid #e3e8ee; /* Very light gray */
+    border-top: 6px solid #4b7bec; /* Matching blue */
+    border-radius: 50%;
+    width: 30px;
+    height: 30px;
+    animation: spin 1s linear infinite;
+    margin: 1rem auto; /* Center the loader */
+}
+
+@keyframes spin {
+    0% {
+        transform: rotate(0deg);
+    }
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+/* Status Message */
+.status {
+    margin-top: 1rem;
+    font-size: 1rem;
+    color: #555; /* Neutral dark gray */
+}

@@ -49,8 +49,8 @@ function FolderToExcelConverter() {
             link.setAttribute('download', filename);  // Set file name for download
             document.body.appendChild(link);
             link.click();
-            document.body.removeChild(link);
-            window.URL.revokeObjectURL(url);
+            // document.body.removeChild(link);
+            // window.URL.revokeObjectURL(url);
 
             // Cleanup: remove link and revoke blob URL
             document.body.removeChild(link);

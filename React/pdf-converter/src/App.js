@@ -23,7 +23,7 @@ function FolderToExcelConverter() {
         pdfFiles.forEach(file => formData.append("files", file));
         setLoading(true); // Set loading state to true
         try {
-            const response = await axios.post("https://carigenpdfconverter.onrender.com/convert_folder/", formData, {
+            const response = await axios.post("https://convertpdf-952332705286.us-central1.run.app/convert_folder/", formData, {
                 headers: {
                     "Content-Type": "multipart/form-data",
                 },

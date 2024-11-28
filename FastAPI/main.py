@@ -4,7 +4,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from typing import List
 from pathlib import Path
 from pdfreader import pdfconvert
-import re
+import tempfile
 from datetime import datetime
 import os
 
@@ -27,6 +27,7 @@ async def convert_folder(files: List[UploadFile] = File(...)):
 
     # Save uploaded PDFs to a temporary directory
     pdf_paths = {}
+    temp_dir = tempfile.TemporaryDirectory()
     user_documents = Path.home() / "Documents"
     os.makedirs(user_documents, exist_ok=True)
     billing_dir = user_documents / "BILLING"
@@ -37,14 +38,10 @@ async def convert_folder(files: List[UploadFile] = File(...)):
             raise HTTPException(status_code=400, detail="Only PDF files are allowed")
         
         # Save each uploaded file temporarily
-        file_path = Path(billing_dir) / file.filename
+        file_path = Path(temp_dir) / file.filename
         with open(file_path, "wb") as f:
             f.write(await file.read())
         pdf_paths[file.filename] = file_path
-
-    # Specify the output Excel file path with the custom directory
-    output_xlsx_name = datetime.today().strftime("%Y-%m") + "-Carigen_Report.xlsx"
-    output_xlsx_path = billing_dir / output_xlsx_name
 
     # Convert PDFs to a single Excel file
     try:

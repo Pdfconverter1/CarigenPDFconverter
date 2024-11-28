@@ -51,16 +51,17 @@ if not exist requirements.txt (
 REM Set up and run backend
 if not exist "env\Scripts\activate.bat" (
     python -m venv env
-)
-call env\Scripts\activate
-pip install -r requirements.txt
-if %errorlevel% neq 0 (
-    echo pip install failed. Check your requirements file.
-    pause
-    exit /b 1
+    call env\Scripts\activate
+    pip install -r requirements.txt
+    if %errorlevel% neq 0 (
+        echo pip install failed. Check your requirements file.
+        pause
+        exit /b 1
+    )
 )
 
-start cmd /k "cd /d %BASEDIR%FastAPI && call env\Scripts\activate && python -m uvicorn main:app --reload"
+
+start cmd /k "cd /d %BASEDIR%FastAPI && python -m uvicorn main:app --reload"
 
 REM Navigate to frontend folder
 cd /d "%BASEDIR%React\pdf-converter"

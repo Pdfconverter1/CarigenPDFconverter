@@ -1,29 +1,32 @@
 import React, { useState } from 'react';
 import axios from 'axios';
-import { BrowserRouter } from 'react-router-dom';
 import './styles.css';
 
 function FolderToExcelConverter() {
     const [pdfFiles, setPdfFiles] = useState([]);
     const [loading, setLoading] = useState(false); // State to track loading status
+    const [statusMessage, setStatusMessage] = useState(""); // Message for status feedback
 
     const handleFolderChange = (event) => {
         const files = Array.from(event.target.files);
         const pdfFiles = files.filter(file => file.type === "application/pdf");
         setPdfFiles(pdfFiles);
+        setStatusMessage(pdfFiles.length > 0 ? `${pdfFiles.length} PDF(s) selected.` : "No files selected.");
     };
 
     const convertFolderToExcel = async () => {
         if (pdfFiles.length === 0) {
-            alert("Please select PDF files first.");
+            setStatusMessage("Please select PDF files first.");
             return;
         }
 
         const formData = new FormData();
         pdfFiles.forEach(file => formData.append("files", file));
         setLoading(true); // Set loading state to true
+        setStatusMessage("Converting to Excel...");
+
         try {
-            const response = await axios.post("https://convertpdf-952332705286.us-central1.run.app/convert_folder/", formData, {
+            const response = await axios.post("http://127.0.0.1:8000/convert_folder/", formData, {
                 headers: {
                     "Content-Type": "multipart/form-data",
                 },
@@ -32,65 +35,60 @@ function FolderToExcelConverter() {
 
             // Create a blob from the response data
             const blob = new Blob([response.data], { type: response.headers["content-type"] });
-            
-            // Extract filename from Content-Disposition header, if available
-            let today = new Date().toLocaleDateString()
-            let p2 = "-report.xlsx";
-            let fname =today.concat(p2);
-            const contentDisposition = response.headers['content-disposition'];
-            const filename = contentDisposition 
-                ? contentDisposition.split('filename=')[1].replace(/"/g, '') 
-                : fname;
 
-            // Create a URL for the blob and set it to the link
+            // Generate the filename with the current date
+            const today = new Date();
+            const year = today.getFullYear();
+            const month = (today.getMonth() + 1).toString().padStart(2, '0'); // Add leading zero for single digits
+            const filename = `Carigen_Report_${year}-${month}.xlsx`; // Format the filename
+
+            // Create a URL for the blob and trigger download
             const url = window.URL.createObjectURL(blob);
             const link = document.createElement('a');
             link.href = url;
-            link.setAttribute('download', filename);  // Set file name for download
+            link.setAttribute('download', filename); // Set file name for download
             document.body.appendChild(link);
             link.click();
-            // document.body.removeChild(link);
-            window.URL.revokeObjectURL(url);
+            window.URL.revokeObjectURL(url); // Cleanup
 
-            // Cleanup: remove link and revoke blob URL
-            document.body.removeChild(link);
-            window.URL.revokeObjectURL(url);
-            
+            setStatusMessage("Conversion successful! Downloading...");
+
         } catch (error) {
             console.error("Error converting folder:", error);
-            alert("Failed to convert folder to Excel.");
-        }finally {
+            if (error.response && error.response.status === 400) {
+                setStatusMessage("Invalid file type or no files uploaded.");
+            } else {
+                setStatusMessage("Failed to convert folder to Excel.");
+            }
+        } finally {
             setLoading(false); // Reset loading state
         }
     };
 
     return (
-        <BrowserRouter basename={process.env.PUBLIC_URL}>
-            <div className="container">
-                <div className="logo-container">
-                    <img src="logo.png" alt="Logo" style={{ maxWidth: '100%', maxHeight: '100%' }} />
-                </div>
-                <h2>Select a Folder Containing PDFs</h2>
-                <label htmlFor="folderInput">Choose Folder</label>
-                <input
-                    id="folderInput"
-                    type="file"
-                    webkitdirectory="true"
-                    onChange={handleFolderChange}
-                />
-                <button
-                    onClick={convertFolderToExcel}
-                    disabled={loading || pdfFiles.length === 0}>
-                    {loading ? "Converting..." : "Convert to Excel"}
-                </button>
-                {loading && <div className="loader"></div>} {/* Show loader when loading */}
-                <div className="status">
-                    {pdfFiles.length > 0
-                        ? `${pdfFiles.length} PDF(s) selected.`
-                        : "No files selected."}
-                </div>
+        <div className="container">
+            <div className="logo-container">
+                <img src="logo.png" alt="Logo" style={{ maxWidth: '100%', maxHeight: '100%' }} />
             </div>
-        </BrowserRouter>
+            <h2>Select a Folder Containing PDFs</h2>
+            <label htmlFor="folderInput">Choose Folder</label>
+            <input
+                id="folderInput"
+                type="file"
+                webkitdirectory="true"
+                onChange={handleFolderChange}
+                disabled={loading} // Disable the folder selection while loading
+            />
+            <button
+                onClick={convertFolderToExcel}
+                disabled={loading || pdfFiles.length === 0}> {/* Disable the button while loading */}
+                {loading ? "Converting..." : "Convert to Excel"}
+            </button>
+            {loading && <div className="loader"></div>} {/* Show loader when loading */}
+            <div className="status">
+                {statusMessage}
+            </div>
+        </div>
     );
 }
 

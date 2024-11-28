@@ -5,12 +5,13 @@ from typing import List
 from pathlib import Path
 from pdfreader import pdfconvert 
 import tempfile
+import os
 from datetime import datetime
 import re
 
 app = FastAPI()
 
-origins = ['http://localhost:3000',"https://pdfconverter1.github.io"]
+origins = ['http://localhost:3000', "https://pdfconverter1.github.io"]
 
 app.add_middleware(
     CORSMiddleware,
@@ -18,7 +19,6 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
 
 @app.post("/convert_folder/")
 async def convert_folder(files: List[UploadFile] = File(...)):
@@ -42,18 +42,25 @@ async def convert_folder(files: List[UploadFile] = File(...)):
         pdf_paths[file_name] = pdf_path
 
     # Specify the output Excel file path
-    output_xlsx_name = datetime.today().strftime("%d-%m-%Y") + "-report.xlsx"
-    output_xlsx_path = Path(tempfile.gettempdir()) / output_xlsx_name
+    output_xlsx_name = datetime.today().strftime("Carigen_Report_%Y-%m") + ".xlsx"
     
-    # Convert PDFs to a single Excel file
-    pdfconvert(pdf_paths, output_xlsx_path)  # Assume pdfconvert takes file paths and output path
+    # Ensure that the directory exists before writing the file
+    output_dir = Path(tempfile.gettempdir())  # The default temporary directory
+    output_xlsx_path = output_dir / output_xlsx_name
+    
+    # Check if the directory exists, and create it if it doesn't
+    if not output_xlsx_path.parent.exists():
+        os.makedirs(output_xlsx_path.parent)
 
-    # Return the generated Excel file as a downloadable response
-    headers = {
-        "Content-Disposition": f"attachment; filename={output_xlsx_name}",
-        "Content-Type": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-    }
+    # Convert PDFs to a single Excel file
     try:
+        pdfconvert(pdf_paths, output_xlsx_path)  # Assume pdfconvert takes file paths and output path
+
+        # Return the generated Excel file as a downloadable response
+        headers = {
+            "Content-Disposition": f"attachment; filename={output_xlsx_name}",
+            "Content-Type": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+        }
         return FileResponse(output_xlsx_path, filename=output_xlsx_name, headers=headers)
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error generating Excel file: {str(e)}")

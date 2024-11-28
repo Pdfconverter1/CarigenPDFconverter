@@ -3,6 +3,7 @@ import pandas as pd
 import os
 import re
 from concurrent.futures import ThreadPoolExecutor
+from datetime import datetime
 
 ID = ["Customer", "Panel:", "Date Reported"]
 
@@ -44,12 +45,35 @@ def process_pdfs_in_parallel(filepaths):
             results[filename] = data
     return results
 
-def pdfconvert(filepath, output_xlsx_path):
+def get_xlsx_filename():
+    """Generate the filename based on the current month and year."""
+    today = datetime.today()
+    month_year = today.strftime("%Y-%m")  # Get the current month and year as 'YYYY-MM'
+    filename = f"Carigen_Report_{month_year}.xlsx"
+    return filename
+
+def pdfconvert(filepath, output_folder):
     """Convert PDFs to Excel."""
     # Process all PDFs in parallel
     results = process_pdfs_in_parallel(filepath)
-    
-    # Convert results to a DataFrame and save to Excel
-    df = pd.DataFrame.from_dict(results, orient='index')
-    df.to_excel(output_xlsx_path, sheet_name='Carigen', index=False)
 
+    # Convert results to a DataFrame
+    df = pd.DataFrame.from_dict(results, orient='index')
+
+    # Get the current month/year based filename
+    xlsx_filename = get_xlsx_filename()
+
+    # Check if the Excel file already exists
+    output_xlsx_path = os.path.join(output_folder, xlsx_filename)
+    
+    if os.path.exists(output_xlsx_path):
+        # If the file exists, append the data to the existing file
+        print(f"Appending to existing file: {output_xlsx_path}")
+        with pd.ExcelWriter(output_xlsx_path, engine='openpyxl', mode='a', if_sheet_exists='overlay') as writer:
+            df.to_excel(writer, sheet_name='Carigen', index=False, header=False)
+    else:
+        # If the file does not exist, create a new one
+        print(f"Creating new file: {output_xlsx_path}")
+        df.to_excel(output_xlsx_path, sheet_name='Carigen', index=False)
+
+    print(f"PDF conversion to Excel completed: {output_xlsx_path}")

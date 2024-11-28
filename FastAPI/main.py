@@ -20,7 +20,6 @@ app.add_middleware(
 )
 
 
-
 @app.post("/convert_folder/")
 async def convert_folder(files: List[UploadFile] = File(...)):
     if not files:
@@ -28,22 +27,24 @@ async def convert_folder(files: List[UploadFile] = File(...)):
 
     # Save uploaded PDFs to a temporary directory
     pdf_paths = {}
+    user_documents = Path.home() / "Documents"
+    os.makedirs(user_documents, exist_ok=True)
+    billing_dir = user_documents / "BILLING"
+    os.makedirs(billing_dir, exist_ok=True)
+
     for file in files:
         if file.content_type != "application/pdf":
             raise HTTPException(status_code=400, detail="Only PDF files are allowed")
         
         # Save each uploaded file temporarily
-        file_path = Path(CUSTOM_SAVE_DIR) / file.filename
+        file_path = Path(user_documents) / file.filename
         with open(file_path, "wb") as f:
             f.write(await file.read())
         pdf_paths[file.filename] = file_path
 
-    user_documents = Path.home() / "Documents"
-    os.makedirs(user_documents, exist_ok=True)
-
     # Specify the output Excel file path with the custom directory
     output_xlsx_name = datetime.today().strftime("%Y-%m") + "-Carigen_Report.xlsx"
-    output_xlsx_path = user_documents / output_xlsx_name
+    output_xlsx_path = billing_dir / output_xlsx_name
 
     # Convert PDFs to a single Excel file
     pdfconvert(pdf_paths, output_xlsx_path)  # Assume pdfconvert takes file paths and output path

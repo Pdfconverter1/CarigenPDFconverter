@@ -37,7 +37,7 @@ async def convert_folder(files: List[UploadFile] = File(...)):
             raise HTTPException(status_code=400, detail="Only PDF files are allowed")
         
         # Save each uploaded file temporarily
-        file_path = Path(user_documents) / file.filename
+        file_path = Path(billing_dir) / file.filename
         with open(file_path, "wb") as f:
             f.write(await file.read())
         pdf_paths[file.filename] = file_path
@@ -47,14 +47,9 @@ async def convert_folder(files: List[UploadFile] = File(...)):
     output_xlsx_path = billing_dir / output_xlsx_name
 
     # Convert PDFs to a single Excel file
-    pdfconvert(pdf_paths, output_xlsx_path)  # Assume pdfconvert takes file paths and output path
-
-    # Return the generated Excel file as a downloadable response
-    headers = {
-        "Content-Disposition": f"attachment; filename={output_xlsx_name}",
-        "Content-Type": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-    }
     try:
-        return FileResponse(output_xlsx_path, filename=output_xlsx_name, headers=headers)
+        pdfconvert(pdf_paths, billing_dir)
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Error generating Excel file: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Error generating Excel file: {e}")
+     # Return success message
+    return {"message": "PDFs processed and Excel file updated successfully."}

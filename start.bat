@@ -81,7 +81,7 @@ call env\Scripts\activate
 pip install -r requirements.txt
 
 REM Start FastAPI backend
-start cmd /k "cd /d %BASEDIR%FastAPI && call env\Scripts\activate && python -m uvicorn main:app --reload"
+start cmd /k "cd /d %BASEDIR%FastAPI && python -m uvicorn main:app --reload"
 
 REM Navigate to the frontend folder
 cd /d "%BASEDIR%React\pdf-converter"

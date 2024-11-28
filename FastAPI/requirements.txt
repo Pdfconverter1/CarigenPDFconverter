@@ -36,5 +36,5 @@ starlette==0.41.2
 typing-extensions==4.12.2
 tzdata==2024.2
 urllib3==2.2.3
-uvicorn==0.32.0
+uvicorn[standard]
 XlsxWriter==3.2.0

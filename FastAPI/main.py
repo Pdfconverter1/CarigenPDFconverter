@@ -28,6 +28,9 @@ async def convert_folder(files: List[UploadFile] = File(...)):
     # Save uploaded PDFs to a temporary directory
     pdf_paths = {}
     temp_dir = tempfile.TemporaryDirectory()
+    temp_dir_path = Path(temp_dir.name)
+    tempbillingdir = temp_dir_path / "BILLING"
+    os.makedirs(temp_dir.name, exist_ok=True)
     user_documents = Path.home() / "Documents"
     os.makedirs(user_documents, exist_ok=True)
     billing_dir = user_documents / "BILLING"
@@ -38,7 +41,8 @@ async def convert_folder(files: List[UploadFile] = File(...)):
             raise HTTPException(status_code=400, detail="Only PDF files are allowed")
         
         # Save each uploaded file temporarily
-        file_path = Path(temp_dir) / file.filename
+        print(file.filename)
+        file_path =  temp_dir_path / file.filename
         with open(file_path, "wb") as f:
             f.write(await file.read())
         pdf_paths[file.filename] = file_path

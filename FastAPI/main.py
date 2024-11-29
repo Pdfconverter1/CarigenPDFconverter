@@ -5,6 +5,7 @@ from typing import List
 from pathlib import Path
 from pdfreader import pdfconvert
 import tempfile
+import re
 from datetime import datetime
 import os
 
@@ -29,8 +30,6 @@ async def convert_folder(files: List[UploadFile] = File(...)):
     pdf_paths = {}
     temp_dir = tempfile.TemporaryDirectory()
     temp_dir_path = Path(temp_dir.name)
-    tempbillingdir = temp_dir_path / "BILLING"
-    os.makedirs(temp_dir.name, exist_ok=True)
     user_documents = Path.home() / "Documents"
     os.makedirs(user_documents, exist_ok=True)
     billing_dir = user_documents / "BILLING"
@@ -41,11 +40,13 @@ async def convert_folder(files: List[UploadFile] = File(...)):
             raise HTTPException(status_code=400, detail="Only PDF files are allowed")
         
         # Save each uploaded file temporarily
-        print(file.filename)
-        file_path =  temp_dir_path / file.filename
+        match = re.search(r"[^/]+$", file.filename)
+        if match:
+            file_name = match.group(0)
+        file_path =  temp_dir_path / file_name
         with open(file_path, "wb") as f:
             f.write(await file.read())
-        pdf_paths[file.filename] = file_path
+        pdf_paths[file_name] = file_path
 
     # Convert PDFs to a single Excel file
     try:

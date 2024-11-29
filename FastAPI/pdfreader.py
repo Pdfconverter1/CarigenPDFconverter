@@ -1,6 +1,8 @@
 import pdfplumber
 import pandas as pd
 import os
+from openpyxl import load_workbook
+from openpyxl.utils.dataframe import dataframe_to_rows
 import re
 from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime
@@ -58,22 +60,47 @@ def pdfconvert(filepath, output_folder):
     results = process_pdfs_in_parallel(filepath)
 
     # Convert results to a DataFrame
-    df = pd.DataFrame.from_dict(results, orient='index')
+    # df = pd.DataFrame.from_dict(results, orient='index', columns=['Name', 'Test Panel', 'Date Reported'])
+    new_df = pd.DataFrame.from_dict(results, orient='index')
 
     # Get the current month/year based filename
     xlsx_filename = get_xlsx_filename()
 
     # Check if the Excel file already exists
     output_xlsx_path = os.path.join(output_folder, xlsx_filename)
-    
+
     if os.path.exists(output_xlsx_path):
-        # If the file exists, append the data to the existing file
-        print(f"Appending to existing file: {output_xlsx_path}")
-        with pd.ExcelWriter(output_xlsx_path, engine='openpyxl', mode='a', if_sheet_exists='overlay') as writer:
-            df.to_excel(writer, sheet_name='Carigen', index=False, header=False)
+        # If the file exists, read it to check for duplicates
+        print(f"Checking for duplicates in existing file: {output_xlsx_path}")
+        existing_df = pd.read_excel(output_xlsx_path, sheet_name='Carigen')
+
+        # Combine old and new data, then drop duplicates
+        combined_df = pd.concat([existing_df, new_df], ignore_index=True).drop_duplicates()
     else:
-        # If the file does not exist, create a new one
+        # If the file does not exist, use the new data
         print(f"Creating new file: {output_xlsx_path}")
-        df.to_excel(output_xlsx_path, sheet_name='Carigen', index=False)
+        combined_df = new_df
+
+    # Save the updated DataFrame back to the Excel file
+    combined_df.to_excel(output_xlsx_path, sheet_name='Carigen', index=False)
+    
+    # if os.path.exists(output_xlsx_path):
+    #     # If the file exists, append the data to the existing file
+    #     print(f"Appending to existing file: {output_xlsx_path}")
+    #     try:
+    #         workbook = load_workbook(output_xlsx_path)
+    #         sheet = workbook.active
+    #         for row in dataframe_to_rows(df, index=False, header=False):
+    #             sheet.append(row)
+    #         workbook.save(output_xlsx_path)
+    #     except Exception as e:
+    #         raise Exception(f"Error appending data: {e}")
+    # else:
+    #     # If the file does not exist, create a new one
+    #     print(f"Creating new file: {output_xlsx_path}")
+    #     try:
+    #         df.to_excel(output_xlsx_path, sheet_name='Carigen', index=False)
+    #     except Exception as e:
+    #         raise Exception(f"Error creating file: {e}")
 
     print(f"PDF conversion to Excel completed: {output_xlsx_path}")

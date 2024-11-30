@@ -28,53 +28,52 @@ def process_pdf(pathname, filename):
                 test = re.search(r"\w+\s*Panel:\s*(.*?)(?=\s+\b\w+\s\w+:|$)", line)
                 if test:
                     panel = test.group(1).strip()
-                    match panel:
-                        case "STI 9":
-                            result['Test Panel'] = "STI-9 CS"
-                        case "CT/NG":
-                            result['Test Panel'] = "CTNGT" 
-                        case "QUAD":
-                            result['Test Panel'] = "QUAD CS"
-                        case "NEURO 9":
-                            result['Test Panel'] = "NEURO 9 CS"
-                        case "CA/GV":
-                            result['Test Panel'] = "CA/GV CS"
-                        case "CANP":
-                            result['Test Panel'] = "CANP" 
-                        case "SYPH":
-                            result['Test Panel'] = "SYPH CS"
-                        case "HIV QUALITATIVE":
-                            result['Test Panel'] = "HIV QUAL CS"
-                        case "HPV SCREEN AND TYPING":
-                            result['Test Panel'] = "HPV SCREEN CS"
-                        case "BACTERAIL VAGINOSIS":
-                            result['Test Panel'] = "BVCS" 
-                        case "CHIK":
-                            result['Test Panel'] = "CHIK CS"
-                        case "CMV":
-                            result['Test Panel'] = "CMV PANEL CS"
-                        case "DENGUE":
-                            result['Test Panel'] = "DENGUE CS"
-                        case "DENGUE/CHIK":
-                            result['Test Panel'] = "DENGUE/CHIK CS" 
-                        case "DENGUE TYPE":
-                            result['Test Panel'] = "DENTYPE"
-                        case "HSV I/II":
-                            result['Test Panel'] = "HSV1 & 2 CS"
-                        case "MTB":
-                            result['Test Panel'] = "MTB CS" 
-                        case "MYCO":
-                            result['Test Panel'] = "MYCO CS"
-                        case "R21":
-                            result['Test Panel'] = "R21 CS"
-                        case "STI 11+":
-                            result['Test Panel'] = "STI 11+"
-                        case "UREA +":
-                            result['Test Panel'] = "UREA PLUS" 
-                        case "ZIK V ":
-                            result['Test Panel'] = "ZIK V CS"
-                        case "TVAG":
-                            result['Test Panel'] = "TVAG CS"                          
+                    if panel == "STI 9":
+                        result['Test Panel'] = "STI-9 CS"
+                    elif panel == "CT/NG":
+                        result['Test Panel'] = "CTNGT" 
+                    elif panel == "QUAD":
+                        result['Test Panel'] = "QUAD CS"
+                    elif panel == "NEURO 9":
+                        result['Test Panel'] = "NEURO 9 CS"
+                    elif panel == "CA/GV":
+                        result['Test Panel'] = "CA/GV CS"
+                    elif panel == "CANP":
+                        result['Test Panel'] = "CANP" 
+                    elif panel == "SYPH":
+                        result['Test Panel'] = "SYPH CS"
+                    elif panel == "HIV QUALITATIVE":
+                        result['Test Panel'] = "HIV QUAL CS"
+                    elif panel == "HPV SCREEN AND TYPING":
+                        result['Test Panel'] = "HPV SCREEN CS"
+                    elif panel == "BACTERAIL VAGINOSIS":
+                        result['Test Panel'] = "BVCS" 
+                    elif panel == "CHIK":
+                        result['Test Panel'] = "CHIK CS"
+                    elif panel == "CMV":
+                        result['Test Panel'] = "CMV PANEL CS"
+                    elif panel == "DENGUE":
+                        result['Test Panel'] = "DENGUE CS"
+                    elif panel == "DENGUE/CHIK":
+                        result['Test Panel'] = "DENGUE/CHIK CS" 
+                    elif panel == "DENGUE TYPE":
+                        result['Test Panel'] = "DENTYPE"
+                    elif panel == "HSV I/II":
+                        result['Test Panel'] = "HSV1 & 2 CS"
+                    elif panel == "MTB":
+                        result['Test Panel'] = "MTB CS" 
+                    elif panel == "MYCO":
+                        result['Test Panel'] = "MYCO CS"
+                    elif panel == "R21":
+                        result['Test Panel'] = "R21 CS"
+                    elif panel == "STI 11+":
+                        result['Test Panel'] = "STI 11+"
+                    elif panel == "UREA +":
+                        result['Test Panel'] = "UREA PLUS" 
+                    elif panel == "ZIK V ":
+                        result['Test Panel'] = "ZIK V CS"
+                    elif panel == "TVAG":
+                        result['Test Panel'] = "TVAG CS"                          
                    # result['Test Panel'] = test.group(1).strip()
             elif "Date Reported" in line:
                 match = re.search(r"Date Reported:\s*(\d{2}/\d{2}/\d{4})", line)

@@ -66,7 +66,7 @@ def process_pdf(pathname, filename):
                         result['Test Panel'] = "MYCO CS"
                     elif panel == "R21":
                         result['Test Panel'] = "R21 CS"
-                    elif panel == "STI 11+":
+                    elif panel == "STI 11+ U":
                         result['Test Panel'] = "STI 11+"
                     elif panel == "UREA +":
                         result['Test Panel'] = "UREA PLUS" 

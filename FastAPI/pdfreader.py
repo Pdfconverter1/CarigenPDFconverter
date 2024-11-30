@@ -44,7 +44,7 @@ def process_pdf(pathname, filename):
                         result['Test Panel'] = "SYPH CS"
                     elif panel == "HIV QUALITATIVE":
                         result['Test Panel'] = "HIV QUAL CS"
-                    elif panel == "HPV SCREEN AND TYPING":
+                    elif panel == "HPV SCREEN":
                         result['Test Panel'] = "HPV SCREEN CS"
                     elif panel == "BACTERAIL VAGINOSIS":
                         result['Test Panel'] = "BVCS" 

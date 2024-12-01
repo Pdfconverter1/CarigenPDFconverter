@@ -85,6 +85,11 @@ button:disabled {
     cursor: not-allowed;
 }
 
+label:disabled {
+    background-color: #ccffcc; /* Light gray-blue for disabled state */
+    cursor: not-allowed;
+}
+
 /* Loader Style */
 .loader {
     border: 6px solid #e3e8ee; /* Very light gray */

@@ -1,17 +1,20 @@
 import pdfplumber
 import pandas as pd
 import os
-from openpyxl import load_workbook
-from openpyxl.utils.dataframe import dataframe_to_rows
 import re
 from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime
 
 ID = ["Customer", "Panel:", "Date Reported"]
 
+Services = {"STI 9":"STI-9 CS","CT/NG":"CTNGT","QUAD":"QUAD CS","NEURO 9":"NEURO 9 CS","CA/GV":"CA/GV CS","CANP":"CANP","SYPH":"SYPH CS","HIV QUALITATIVE":"HIV QUAL CS",
+            "HPV SCREEN AND TYPING":"HPV SCREEN CS","HPV SCREEN":"HPV SCREEN CS","BACTERAIL VAGINOSIS":"BVCS","CHIK":"CHIK CS","CMV":"CMV PANEL CS","DENGUE":"DENGUE CS",
+            "DENGUE/CHIK":"DENGUE/CHIK CS","DENGUE TYPE":"DENTYPE","HSV I/II":"HSV1 & 2 CS","MTB":"MTB CS","MYCO":"MYCO CS","R21":"R21 CS","STI 11+":"STI 11+", "STI 11+ U":"STI 11+",
+            "UREA +":"UREA PLUS","ZIK V":"ZIK V CS","TVAG":"TVAG CS"}
+
 def process_pdf(pathname, filename):
     """Extract data from a single PDF."""
-    result = {'Name': None, 'Test Panel': None, 'Date Reported': None}
+    result = {'Name': None, 'Test Panel': None, 'Service Date': None}
     
     try:
         with pdfplumber.open(pathname) as pdf:
@@ -28,57 +31,11 @@ def process_pdf(pathname, filename):
                 test = re.search(r"\w+\s*Panel:\s*(.*?)(?=\s+\b\w+\s\w+:|$)", line)
                 if test:
                     panel = test.group(1).strip()
-                    if panel == "STI 9":
-                        result['Test Panel'] = "STI-9 CS"
-                    elif panel == "CT/NG":
-                        result['Test Panel'] = "CTNGT" 
-                    elif panel == "QUAD":
-                        result['Test Panel'] = "QUAD CS"
-                    elif panel == "NEURO 9":
-                        result['Test Panel'] = "NEURO 9 CS"
-                    elif panel == "CA/GV":
-                        result['Test Panel'] = "CA/GV CS"
-                    elif panel == "CANP":
-                        result['Test Panel'] = "CANP" 
-                    elif panel == "SYPH":
-                        result['Test Panel'] = "SYPH CS"
-                    elif panel == "HIV QUALITATIVE":
-                        result['Test Panel'] = "HIV QUAL CS"
-                    elif panel == "HPV SCREEN":
-                        result['Test Panel'] = "HPV SCREEN CS"
-                    elif panel == "BACTERAIL VAGINOSIS":
-                        result['Test Panel'] = "BVCS" 
-                    elif panel == "CHIK":
-                        result['Test Panel'] = "CHIK CS"
-                    elif panel == "CMV":
-                        result['Test Panel'] = "CMV PANEL CS"
-                    elif panel == "DENGUE":
-                        result['Test Panel'] = "DENGUE CS"
-                    elif panel == "DENGUE/CHIK":
-                        result['Test Panel'] = "DENGUE/CHIK CS" 
-                    elif panel == "DENGUE TYPE":
-                        result['Test Panel'] = "DENTYPE"
-                    elif panel == "HSV I/II":
-                        result['Test Panel'] = "HSV1 & 2 CS"
-                    elif panel == "MTB":
-                        result['Test Panel'] = "MTB CS" 
-                    elif panel == "MYCO":
-                        result['Test Panel'] = "MYCO CS"
-                    elif panel == "R21":
-                        result['Test Panel'] = "R21 CS"
-                    elif panel == "STI 11+ U":
-                        result['Test Panel'] = "STI 11+"
-                    elif panel == "UREA +":
-                        result['Test Panel'] = "UREA PLUS" 
-                    elif panel == "ZIK V ":
-                        result['Test Panel'] = "ZIK V CS"
-                    elif panel == "TVAG":
-                        result['Test Panel'] = "TVAG CS"                          
-                   # result['Test Panel'] = test.group(1).strip()
+                    result['Test Panel'] = Services[panel]    
             elif "Date Reported" in line:
                 match = re.search(r"Date Reported:\s*(\d{2}/\d{2}/\d{4})", line)
                 if match:
-                    result['Date Reported'] = match.group(1)
+                    result['Service Date'] = match.group(1)
     except Exception as e:
         print(f"Error processing {filename}: {e}")
 

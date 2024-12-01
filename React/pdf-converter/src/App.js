@@ -44,7 +44,7 @@ function FolderToExcelConverter() {
     return (
         <div className="container">
             <div className="logo-container">
-                <img src="logo.png" alt="Logo" style={{ maxWidth: '100%', maxHeight: '100%' }} />
+                <img src={require('./logo.png')} alt="Logo" style={{ maxWidth: '100%', maxHeight: '100%' }} />
             </div>
             <h2>Select a Folder Containing PDFs</h2>
             <label htmlFor="folderInput">Choose Folder</label>

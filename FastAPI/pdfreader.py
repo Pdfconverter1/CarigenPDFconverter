@@ -51,14 +51,14 @@ def process_pdfs_in_parallel(filepaths):
             results[filename] = data
     return results
 
-def get_xlsx_filename():
-    """Generate the filename based on the current month and year."""
-    today = datetime.today()
-    month_year = today.strftime("%Y-%m")  # Get the current month and year as 'YYYY-MM'
-    filename = f"Carigen_Report_{month_year}.xlsx"
-    return filename
+# def get_xlsx_filename():
+#     """Generate the filename based on the current month and year."""
+#     today = datetime.today()
+#     month_year = today.strftime("%Y-%m")  # Get the current month and year as 'YYYY-MM'
+#     filename = f"Carigen_Report_{month_year}.xlsx"
+#     return filename
 
-def pdfconvert(filepath, output_folder):
+def pdfconvert(filepath, output_folder,fname):
     """Convert PDFs to Excel."""
     # Process all PDFs in parallel
     results = process_pdfs_in_parallel(filepath)
@@ -68,10 +68,10 @@ def pdfconvert(filepath, output_folder):
     new_df = pd.DataFrame.from_dict(results, orient='index')
 
     # Get the current month/year based filename
-    xlsx_filename = get_xlsx_filename()
+    #xlsx_filename = get_xlsx_filename()
 
     # Check if the Excel file already exists
-    output_xlsx_path = os.path.join(output_folder, xlsx_filename)
+    output_xlsx_path = os.path.join(output_folder, fname)
 
     if os.path.exists(output_xlsx_path):
         # If the file exists, read it to check for duplicates

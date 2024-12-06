@@ -116,3 +116,26 @@ label:disabled {
     font-size: 1rem;
     color: #555; /* Neutral dark gray */
 }
+
+h3 {
+    margin-top: 20px;
+    color: #333;
+}
+
+input[type="file"],
+input[type="text"] {
+    display: block;
+    margin-top: 10px;
+    margin-bottom: 10px;
+    padding: 5px;
+    font-size: 1rem;
+    width: 100%;
+    max-width: 300px;
+}
+
+.button-container {
+    display: flex;
+    gap: 10px; /* Space between buttons */
+    margin-top: 10px;
+}
+

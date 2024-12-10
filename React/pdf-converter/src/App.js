@@ -42,10 +42,9 @@ function FolderToExcelConverter() {
 
         // Add either the selected file name or the entered text to the form data
         const referenceName = selectedFile || textBoxValue; 
-        if (referenceName ==""){
+        if (referenceName ===""){
             console.error('Error with Document Name');
-            setStatusMessage('Failed to convert folder. Please select an existing file or nter the name for a new one')
-            controller.abort();
+            setStatusMessage('Failed to convert folder. Please select an existing file or enter the name for a new one')
             
         } 
         else{
@@ -64,7 +63,7 @@ function FolderToExcelConverter() {
                 signal: controller.signal,
             }).catch((error) => {
                 if (axios.isCancel(error)) {
-                    console.log("Failed to convert folder. Please select an existing file or nter the name for a new one");
+                    console.log("Failed to convert folder. Please select an existing file or enter the name for a new one");
                 } else {
                     console.error("Error:", error);
                 }
@@ -131,9 +130,9 @@ function FolderToExcelConverter() {
                 disabled={loading} // Disable while loading
             />
             <p>Please add .xlsx to name entered</p>
-            {textBoxValue != "" && <p>Text Entered: {textBoxValue}</p>}
+            {textBoxValue !== "" && <p>Text Entered: {textBoxValue}</p>}
             {loading && <div className="loader"></div>} {/* Show loader when loading */}
-            {statusMessage != "" &&<div className="status">{statusMessage}</div>}
+            {statusMessage !== "" &&<div className="status">{statusMessage}</div>}
         </div>
     );
 }

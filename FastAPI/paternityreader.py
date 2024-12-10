@@ -77,6 +77,7 @@ def paternityconvert(filepath, output_folder,fname):
     # df = pd.DataFrame.from_dict(results, orient='index', columns=['Name', 'Test Panel', 'Date Reported'])
     new_df = pd.DataFrame.from_dict(results, orient='index')
 
+
     # Get the current month/year based filename
     #xlsx_filename = get_xlsx_filename()
 
@@ -90,10 +91,12 @@ def paternityconvert(filepath, output_folder,fname):
 
         # Combine old and new data, then drop duplicates
         combined_df = pd.concat([existing_df, new_df], ignore_index=True).drop_duplicates()
+        combined_df['Service Date'] = pd.to_date(combined_df['Service Date'])
     else:
         # If the file does not exist, use the new data
         print(f"Creating new file: {output_xlsx_path}")
         combined_df = new_df
+        combined_df['Service Date'] = pd.to_date(combined_df['Service Date'])
 
     # Save the updated DataFrame back to the Excel file
     combined_df.to_excel(output_xlsx_path, sheet_name='Carigen', index=False)

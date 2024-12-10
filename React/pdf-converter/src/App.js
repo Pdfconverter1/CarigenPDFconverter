@@ -79,6 +79,10 @@ function FolderToExcelConverter() {
             setStatusMessage(`Failed to convert folder to ${apiEndpoint.replace("_", " ").toUpperCase()}.`);
         } finally {
             setLoading(false);
+            setPdfFiles([]);
+            setSelectedFile("");
+            setTextBoxValue("");
+
         }
     };
 

@@ -20,14 +20,14 @@ def process_pdf(pathname, filename):
         lines = text.split("\n ")
         filtered_lines = [line for line in lines if any(id_ in line for id_ in ID)]
 
-        print(filtered_lines)
+        #print(filtered_lines)
 
         for line in filtered_lines:
             if "Alleged Father:" in line:
                 match = re.search(r"Alleged Father:\s+([A-Za-z]+(?:\s[A-Za-z.]+)*-?[A-Za-z]*)", line)
                 if match:
                     name = match.group(1)
-                    print(name)
+                   # print(name)
                 result['Name'] = name
             else:
                 for i in Relation:
@@ -35,23 +35,23 @@ def process_pdf(pathname, filename):
                         match = re.search(i + r"\s+([A-Za-z]+(?:\s[A-Za-z.]+)*-?[A-Za-z]*)", line)
                         if match:
                             name = match.group(1)
-                            print(name)
+                           # print(name)
                         result['Name'] = name  
             if "CARIGEN Case #" in line:
                 test = re.findall(r"\b\d{2}[A-Z]{1,2}\d{5}[A-Z]{2}\b", line)
                 if test:
                     if "PP" in test[0]:
-                        print("PP")
+                       # print("PP")
                         result['Test Panel'] = "Personal Paternity"
                     elif "PL" in test[0]:
-                        print("PL")
+                      #  print("PL")
                         result['Test Panel'] = "Legal Paternity"
                     else:
                         print ("Not found")             
             if "Report Date:" in line:
                 match = re.search(r"\b[A-Z][a-z]+\s\d{1,2},\s\d{4}\b", line)
                 if match:
-                    print(match.group(0))
+                   # print(match.group(0))
                     result['Service Date'] = match.group(0)
     except Exception as e:
         print(f"Error processing {filename}: {e}")
@@ -91,12 +91,11 @@ def paternityconvert(filepath, output_folder,fname):
 
         # Combine old and new data, then drop duplicates
         combined_df = pd.concat([existing_df, new_df], ignore_index=True).drop_duplicates()
-        combined_df['Service Date'] = pd.to_date(combined_df['Service Date'])
+
     else:
         # If the file does not exist, use the new data
         print(f"Creating new file: {output_xlsx_path}")
         combined_df = new_df
-        combined_df['Service Date'] = pd.to_date(combined_df['Service Date'])
 
     # Save the updated DataFrame back to the Excel file
     combined_df.to_excel(output_xlsx_path, sheet_name='Carigen', index=False)

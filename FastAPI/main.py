@@ -5,6 +5,7 @@ from typing import List
 from pathlib import Path
 from pdfreader import pdfconvert
 from paternityreader import paternityconvert
+from upload import upload_invoices
 import tempfile
 import re
 from datetime import datetime
@@ -96,3 +97,12 @@ async def convert_paternity(files: List[UploadFile] = File(...),reference_name: 
         raise HTTPException(status_code=500, detail=f"Error generating Excel file: {e}")
      # Return success message
     return {"message": "PDFs processed and Excel file updated successfully."}
+
+@app.post("/upload_invoices/")
+async def upload_invoice(reference_name: str = Form(None)):
+    try:
+        upload_invoices(reference_name)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error uploading Invoice: {e}")
+     # Return success message
+    return {"message": "Invoices uploaded successfully."}

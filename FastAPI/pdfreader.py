@@ -14,7 +14,7 @@ Services = {"STI 9":"STI-9 CS","CT/NG":"CTNGT","QUAD":"QUAD CS","NEURO 9":"NEURO
 
 def process_pdf(pathname, filename):
     """Extract data from a single PDF."""
-    result = {'Name': None, 'Test Panel': None, 'Service Date': None}
+    result = {'Customer Name': None, 'Product/Service': None, 'Service Date': None}
     
     try:
         with pdfplumber.open(pathname) as pdf:
@@ -26,12 +26,12 @@ def process_pdf(pathname, filename):
 
         for line in filtered_lines:
             if "Customer" in line:
-                result['Name'] = re.sub(r"(Customer Name:\s*|\b\w+:\s*)", "", line).strip()
+                result['Customer Name'] = re.sub(r"(Customer Name:\s*|\b\w+:\s*)", "", line).strip()
             elif "Panel:" in line:
                 test = re.search(r"\w+\s*Panel:\s*(.*?)(?=\s+\b\w+\s\w+:|$)", line)
                 if test:
                     panel = test.group(1).strip()
-                    result['Test Panel'] = Services[panel]    
+                    result['Product/Service'] = Services[panel]    
             elif "Date Reported" in line:
                 match = re.search(r"Date Reported:\s*(\d{2}/\d{2}/\d{4})", line)
                 if match:

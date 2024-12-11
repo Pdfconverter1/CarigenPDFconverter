@@ -31,7 +31,48 @@ function FolderToExcelConverter() {
         setTextBoxValue(event.target.value); // Update text box value
     };
 
+    const handleInvoiceUpload = async(apiEndpoint) => { 
+        const referenceName = selectedFile || textBoxValue; 
+        const formData = new FormData();
+        formData.append("reference_name", referenceName); // Send the reference name to the backend
+        setLoading(true);
+        setStatusMessage("Converting...");
+        
+
+        try {
+            const response = await axios.post(`http://127.0.0.1:8000/${apiEndpoint}/`, formData, {
+                headers: {
+                    "Content-Type": "multipart/form-data",
+                },
+                signal: controller.signal,
+            }).catch((error) => {
+                if (axios.isCancel(error)) {
+                    console.log("Failed to upload folder. Please select an existing file or enter the name for a new one");
+                } else {
+                    console.error("Error:", error);
+                }
+            });
+
+            setStatusMessage(response.data.message); // Update message based on the backend response
+            setPdfFiles([]);
+            setSelectedFile("");
+            setTextBoxValue("");
+
+        } catch (error) {
+            console.error(`Error with ${apiEndpoint} conversion:`, error);
+            setStatusMessage(`Failed to convert folder to ${apiEndpoint.replace("_", " ").toUpperCase()}.`);
+        } finally {
+            setLoading(false);
+            setPdfFiles([]);
+            setSelectedFile("");
+            setTextBoxValue("");
+
+        }
+            
+    }
+
     const handleConversion = async (apiEndpoint) => {
+        
         if (pdfFiles.length === 0) {
             setStatusMessage("Please select PDF files first.");
             return;
@@ -112,6 +153,11 @@ function FolderToExcelConverter() {
                     onClick={() => handleConversion("convert_paternity")}
                     disabled={loading || pdfFiles.length === 0}> {/* Disable the button while loading */}
                     {loading ? "Converting..." : "Convert Paternity"}
+                </button>
+                <button
+                    onClick={() => handleInvoiceUpload("upload_invoices")}
+                    disabled={loading || selectedFile === ""}> {/* Disable the button while loading */}
+                    {loading ? "Converting..." : "Upload Invoices"}
                 </button>
             </div>
             <h3>Choose Existing File or Enter Name of New File</h3>

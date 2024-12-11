@@ -10,7 +10,7 @@ Relation =["Niece:","Nephew:","Grandson:","Granddaughter:","Sibling:","Half sibl
 
 def process_pdf(pathname, filename):
     """Extract data from a single PDF."""
-    result = {'Name': None, 'Test Panel': None, 'Service Date': None}
+    result = {'Customer Name': None, 'Product/Service': None, 'Service Date': None}
     
     try:
         with pdfplumber.open(pathname) as pdf:
@@ -28,7 +28,7 @@ def process_pdf(pathname, filename):
                 if match:
                     name = match.group(1)
                    # print(name)
-                result['Name'] = name
+                result['Customer Name'] = name
             else:
                 for i in Relation:
                     if i in line:
@@ -36,23 +36,25 @@ def process_pdf(pathname, filename):
                         if match:
                             name = match.group(1)
                            # print(name)
-                        result['Name'] = name  
+                        result['Customer Name'] = name  
             if "CARIGEN Case #" in line:
                 test = re.findall(r"\b\d{2}[A-Z]{1,2}\d{5}[A-Z]{2}\b", line)
                 if test:
                     if "PP" in test[0]:
                        # print("PP")
-                        result['Test Panel'] = "Personal Paternity"
+                        result['Product/Service'] = "Personal Paternity"
                     elif "PL" in test[0]:
                       #  print("PL")
-                        result['Test Panel'] = "Legal Paternity"
+                        result['Product/Service'] = "Legal Paternity"
                     else:
                         print ("Not found")             
             if "Report Date:" in line:
                 match = re.search(r"\b[A-Z][a-z]+\s\d{1,2},\s\d{4}\b", line)
                 if match:
                    # print(match.group(0))
-                    result['Service Date'] = match.group(0)
+                    sdate = match.group(0)
+                    dateobj = datetime.strptime(sdate, "%B-%d-%y")                 
+                    result['Service Date'] = dateobj
     except Exception as e:
         print(f"Error processing {filename}: {e}")
 

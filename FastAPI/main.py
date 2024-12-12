@@ -101,7 +101,7 @@ async def convert_paternity(files: List[UploadFile] = File(...),reference_name: 
 @app.post("/upload_invoices/")
 async def upload_invoice(reference_name: str = Form(None)):
     try:
-        upload_invoices(reference_name)
+        upload_invoices("C:/Users/Nori/Documents/BILLING/New50.xlsx")
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error uploading Invoice: {e}")
      # Return success message

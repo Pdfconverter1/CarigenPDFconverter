@@ -7,14 +7,17 @@ import base64
 CLIENT_ID = "ABknZy5LZwiMw4bgx7qOw1bG5nLsbwvc3fIWgIz989wyLMqSg1"
 CLIENT_SECRET = "I9mJ4PEgmc236UcWoKZXFz51U2wTfILi4yf6ff3H"
 REDIRECT_URI = "http://localhost:5000/callback"  # Set this in the Intuit Developer Portal
-AUTHORIZATION_CODE = "AB11733884329G8KLFJn80jJnG3Lo9iTtqldWyLvy5HL9FvebJ"  # Replace with the authorization code obtained
-REFRESH_TOKEN = "AB11742610516pvKLwtnMoZOIVbZ6vJJLb4G9zt06qKkgm5UqG"  # Replace with the refresh token
+AUTHORIZATION_CODE = "AB11733896392rdCfx9zuBortG3a9xIjpHTEHlexOBb5t9TwhN"  # Replace with the authorization code obtained
+REFRESH_TOKEN = "AB11742622512kVF8QG27DXxLi3qM9kMcaWDPuyf11y2xcBisx"  # Replace with the refresh token
 COMPANY_ID = "9341453609218497"  # Find this in QuickBooks
 
 # QuickBooks API Endpoints
 BASE_URL = "https://sandbox-quickbooks.api.intuit.com"
 TOKEN_ENDPOINT = "https://oauth.platform.intuit.com/oauth2/v1/tokens/bearer"
 INVOICE_ENDPOINT = f"{BASE_URL}/v3/company/{COMPANY_ID}/invoice"
+CUSTOMER_ENDPOINT = f"{BASE_URL}/v3/company/{COMPANY_ID}/customer"
+CUSTOMERQ_ENDPOINT = f"{BASE_URL}/v3/company/{COMPANY_ID}/query"
+ITEM_ENDPOINT = f"{BASE_URL}/v3/company/{COMPANY_ID}/query"
 
 # Step 1: Get Access Token
 def get_access_token():
@@ -64,27 +67,90 @@ def read_excel(file_path):
     return df
 
 # Step 4: Format Data for QuickBooks
-def format_data(row):
+def format_data(row,access_token):
     # QuickBooks invoice payload
+    item_info = get_service(row,access_token)
+    print(item_info)
     invoice = {
         "CustomerRef": {
-            "name": row["Customer Name"]
+            "name": row["Customer Name"],
+            "value": "100"
         },
         "Line": [
             {
                 "DetailType": "SalesItemLineDetail",
                 "SalesItemLineDetail": {
                     "ItemRef": {
-                        "name": row["Product/Service"]
+                        "name": row["Product/Service"],
+                        "value": item_info['Id'],
+                        "Description": item_info['Description'],
+                        "UnitPrice": item_info['UnitPrice']
                     },
                     "ServiceDate": row["Service Date"]
                 },
-                "Amount": row.get("Amount", 0),
-                "Description": row.get("Description", "")
+                "Amount": 0
             }
         ]
     }
     return invoice
+
+def create_customer(cusname, access_token):
+    headers = {
+        "Authorization": f"Bearer {access_token}",
+        "Accept": "application/json",
+        "Content-Type": "application/json"
+    }
+    customer_name = cusname["Customer Name"]
+
+    # Check if customer already exists
+    existing_customers = get_existing_customers(access_token)
+    if customer_name in existing_customers:
+        print(f"Customer '{customer_name}' already exists.")
+        return {"Id": existing_customers[customer_name], "DisplayName": customer_name}
+    customer = {
+        "FullyQualifiedName": customer_name,
+        "DisplayName": customer_name
+    }
+
+    response = requests.post(CUSTOMER_ENDPOINT, headers=headers, data=json.dumps(customer))
+    if response.status_code == 200:
+        new_customer = response.json()['Customer']
+        print(f"Customer '{customer_name}' created successfully.")
+        return {"Id": new_customer['Id'], "DisplayName": new_customer['DisplayName']}
+    else:
+        print(f"Error creating customer '{customer_name}': {response.text}")
+        return None
+    
+def get_existing_customers(access_token):
+    headers = {
+        "Authorization": f"Bearer {access_token}",
+        "Accept": "application/json"
+    }
+    response = requests.get(f"{CUSTOMERQ_ENDPOINT}?query=SELECT Id, DisplayName FROM Customer", headers=headers)
+    if response.status_code == 200:
+        return {customer['DisplayName']: customer['Id'] for customer in response.json().get('QueryResponse', {}).get('Customer', [])}
+    else:
+        print(f"Error fetching customers: {response.text}")
+        return {}
+    
+def get_service(service_name, access_token):
+    servicen = service_name["Product/Service"]
+    headers = {
+        "Authorization": f"Bearer {access_token}",
+        "Accept": "application/json"
+    }
+    response = requests.get(f"{ITEM_ENDPOINT}?query=select Id, Name, Description, UnitPrice from Item ", headers=headers)
+    if response.status_code == 200:
+        service_list = {service['Name']: service['Id'] for service in response.json().get('QueryResponse', {}).get('Item', [])}
+        service_list.update({service['Description']: service['UnitPrice'] for service in response.json().get('QueryResponse', {}).get('Item', [])})
+        print(service_list)
+        if servicen in service_list:
+            print(f"Item '{servicen}' found.")
+        return {"Id": service_list[servicen], "DisplayName": servicen, 'UnitPrice': service_list[service_list['Description']], 'Description':service_list['Description'] }
+    else:
+        print(f"Error fetching Product/Services: {response.text}")
+        return {}
+
 
 # Step 5: Send Invoice to QuickBooks API
 def create_invoice(invoice, access_token):
@@ -101,12 +167,18 @@ def upload_invoices(file_path):
     try:
         # Get or refresh access token
         access_token, refresh_token = refresh_access_token()
-        
+
         df = read_excel(file_path)
         for index, row in df.iterrows():
-            invoice = format_data(row)
-            response = create_invoice(invoice, access_token)
-            print(f"Invoice for {row['Customer Name']}: {response}")
+            customer_info = create_customer(row, access_token)
+            if customer_info:
+                invoice = format_data(row,access_token)
+                # Update the CustomerRef with the correct ID
+                invoice["CustomerRef"]["value"] = customer_info["Id"]
+                response = create_invoice(invoice, access_token)
+                print(f"Invoice for {customer_info['DisplayName']}: {response}")
+            else:
+                print(f"Skipping invoice creation due to customer creation error: {row['Customer Name']}")
     except Exception as e:
         print(f"Error: {e}")
 

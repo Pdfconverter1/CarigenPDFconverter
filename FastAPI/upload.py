@@ -2,6 +2,7 @@ import pandas as pd
 import requests
 import json
 import base64
+import urllib.parse
 
 # QuickBooks API Credentials
 CLIENT_ID = "ABknZy5LZwiMw4bgx7qOw1bG5nLsbwvc3fIWgIz989wyLMqSg1"
@@ -70,7 +71,6 @@ def read_excel(file_path):
 def format_data(row,access_token):
     # QuickBooks invoice payload
     item_info = get_service(row,access_token)
-    print(item_info)
     invoice = {
         "CustomerRef": {
             "name": row["Customer Name"],
@@ -83,12 +83,11 @@ def format_data(row,access_token):
                     "ItemRef": {
                         "name": row["Product/Service"],
                         "value": item_info['Id'],
-                        "Description": item_info['Description'],
-                        "UnitPrice": item_info['UnitPrice']
                     },
                     "ServiceDate": row["Service Date"]
                 },
-                "Amount": 0
+                "Amount": item_info['UnitPrice'],
+                "Description": item_info['Description']
             }
         ]
     }
@@ -134,19 +133,38 @@ def get_existing_customers(access_token):
         return {}
     
 def get_service(service_name, access_token):
-    servicen = service_name["Product/Service"]
+    servicen = service_name.get("Product/Service")
+    if not servicen:
+        print("Error: Missing 'Product/Service' in input data.")
+        return {}
+
+    # Prepare the query
+    query = f"SELECT Id, Name, Description, UnitPrice FROM Item WHERE Name = '{servicen}'"
+    encoded_query = urllib.parse.quote(query)
+    url = f"{ITEM_ENDPOINT}?query={encoded_query}"
+
+    # Send the request
     headers = {
         "Authorization": f"Bearer {access_token}",
         "Accept": "application/json"
     }
-    response = requests.get(f"{ITEM_ENDPOINT}?query=select Id, Name, Description, UnitPrice from Item ", headers=headers)
+    response = requests.get(url, headers=headers)
+
+    # Process the response
     if response.status_code == 200:
-        service_list = {service['Name']: service['Id'] for service in response.json().get('QueryResponse', {}).get('Item', [])}
-        service_list.update({service['Description']: service['UnitPrice'] for service in response.json().get('QueryResponse', {}).get('Item', [])})
-        print(service_list)
-        if servicen in service_list:
-            print(f"Item '{servicen}' found.")
-        return {"Id": service_list[servicen], "DisplayName": servicen, 'UnitPrice': service_list[service_list['Description']], 'Description':service_list['Description'] }
+        items = response.json().get('QueryResponse', {}).get('Item', [])
+        if not items:
+            print(f"Item '{servicen}' not found.")
+            return {}
+
+        # Assuming the first match is correct
+        item = items[0]
+        return {
+            "Id": item["Id"],
+            "DisplayName": item["Name"],
+            "UnitPrice": item["UnitPrice"],
+            "Description": item["Description"]
+        }
     else:
         print(f"Error fetching Product/Services: {response.text}")
         return {}
@@ -175,6 +193,7 @@ def upload_invoices(file_path):
                 invoice = format_data(row,access_token)
                 # Update the CustomerRef with the correct ID
                 invoice["CustomerRef"]["value"] = customer_info["Id"]
+                print(invoice)
                 response = create_invoice(invoice, access_token)
                 print(f"Invoice for {customer_info['DisplayName']}: {response}")
             else:

@@ -53,8 +53,9 @@ def process_pdf(pathname, filename):
                 if match:
                    # print(match.group(0))
                     sdate = match.group(0)
-                    dateobj = datetime.strptime(sdate, "%B-%d-%y")                 
-                    result['Service Date'] = dateobj
+                    dateobj = datetime.strptime(sdate, "%B %d, %Y") 
+                    date = dateobj.strftime("%m/%d/%Y")                
+                    result['Service Date'] = date
     except Exception as e:
         print(f"Error processing {filename}: {e}")
 

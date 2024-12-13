@@ -3,13 +3,14 @@ import requests
 import json
 import base64
 import urllib.parse
+from datetime import datetime
 
 # QuickBooks API Credentials
 CLIENT_ID = "ABknZy5LZwiMw4bgx7qOw1bG5nLsbwvc3fIWgIz989wyLMqSg1"
 CLIENT_SECRET = "I9mJ4PEgmc236UcWoKZXFz51U2wTfILi4yf6ff3H"
 REDIRECT_URI = "http://localhost:5000/callback"  # Set this in the Intuit Developer Portal
-AUTHORIZATION_CODE = "AB11733896392rdCfx9zuBortG3a9xIjpHTEHlexOBb5t9TwhN"  # Replace with the authorization code obtained
-REFRESH_TOKEN = "AB11742622512kVF8QG27DXxLi3qM9kMcaWDPuyf11y2xcBisx"  # Replace with the refresh token
+AUTHORIZATION_CODE = "AB11734067400kXNj7VpsnpzaZPBFTvQes45Gz5wsalWe0f5JL"  # Replace with the authorization code obtained
+REFRESH_TOKEN = "AB11742793510T2H6wQtQjAjoAQJWCy2wPUCcDQduRiTxh2znA"  # Replace with the refresh token
 COMPANY_ID = "9341453609218497"  # Find this in QuickBooks
 
 # QuickBooks API Endpoints
@@ -70,6 +71,8 @@ def read_excel(file_path):
 # Step 4: Format Data for QuickBooks
 def format_data(row,access_token):
     # QuickBooks invoice payload
+    date_object = datetime.strptime(row["Service Date"],'%m/%d/%Y')
+    date = date_object.strftime('%Y-%m-%d')
     item_info = get_service(row,access_token)
     invoice = {
         "CustomerRef": {
@@ -84,7 +87,7 @@ def format_data(row,access_token):
                         "name": row["Product/Service"],
                         "value": item_info['Id'],
                     },
-                    "ServiceDate": row["Service Date"]
+                    "ServiceDate": date
                 },
                 "Amount": item_info['UnitPrice'],
                 "Description": item_info['Description']

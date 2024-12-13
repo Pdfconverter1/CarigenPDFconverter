@@ -35,7 +35,9 @@ def process_pdf(pathname, filename):
             elif "Date Reported" in line:
                 match = re.search(r"Date Reported:\s*(\d{2}/\d{2}/\d{4})", line)
                 if match:
-                    result['Service Date'] = match.group(1)
+                    dateobj = datetime.strptime(match.group(1),'%m/%d/%Y')
+                    date = dateobj.strftime("%m/%d/%Y")   
+                    result['Service Date'] = date
     except Exception as e:
         print(f"Error processing {filename}: {e}")
 

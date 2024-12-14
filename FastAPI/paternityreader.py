@@ -5,12 +5,19 @@ import re
 from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime
 
-ID = ["CARIGEN Case", "Alleged Father", "Report Date","Niece:","Nephew:","Grandson:","Granddaughter:","Sibling:","Half sibling:","Cousin:"]
+ID = ["CARIGEN Case", "Alleged Father", "Report Date","Niece:","Nephew:","Grandson:","Granddaughter:","Sibling:","Half sibling:","Cousin:","Mother:"]
 Relation =["Niece:","Nephew:","Grandson:","Granddaughter:","Sibling:","Half sibling:","Cousin:"]
+
 
 def process_pdf(pathname, filename):
     """Extract data from a single PDF."""
     result = {'Customer Name': None, 'Product/Service': None, 'Service Date': None}
+
+    Mother = False
+    Sibling = False
+    GrandParent = False
+    Aunt_Uncle = False
+    Cousin = False
     
     try:
         with pdfplumber.open(pathname) as pdf:
@@ -19,8 +26,33 @@ def process_pdf(pathname, filename):
 
         lines = text.split("\n ")
         filtered_lines = [line for line in lines if any(id_ in line for id_ in ID)]
+        print(filtered_lines)
 
-        #print(filtered_lines)
+        for i in filtered_lines:
+            if "Mother:" in i:
+                Mother = True
+                print("Mother")
+            elif  "Sibling:" in i:
+                Sibling = True
+                print("Sibling")
+            elif "Half sibling:" in i:
+                Sibling = True
+                print("HSibling")    
+            elif  "Grandson:" in i:
+                GrandParent = True
+                print("Grands")
+            elif "Granddaughter:" in i:
+                GrandParent = True
+                print("Grandd")    
+            elif  "Niece" in i:
+                Aunt_Uncle = True
+                print("auncle")
+            elif "Nephew" in i:
+                Aunt_Uncle = True
+                print("auncle")    
+            elif "Cousin:" in i:
+                Cousin = True
+                print("Cousin")              
 
         for line in filtered_lines:
             if "Alleged Father:" in line:
@@ -41,11 +73,31 @@ def process_pdf(pathname, filename):
                 test = re.findall(r"\b\d{2}[A-Z]{1,2}\d{5}[A-Z]{2}\b", line)
                 if test:
                     if "PP" in test[0]:
-                       # print("PP")
-                        result['Product/Service'] = "Personal Paternity"
+                        if Mother:
+                            result['Product/Service'] = "PPTTCS"
+                        elif Sibling:
+                             result['Product/Service'] = "PSTCS"
+                        elif GrandParent:
+                             result['Product/Service'] = "PGTCS"
+                        elif Aunt_Uncle:
+                             result['Product/Service'] = "PAUTCS"
+                        elif Cousin:
+                             result['Product/Service'] = "RelaC CS"
+                        else:
+                             result['Product/Service'] = "PPTMCS"           
                     elif "PL" in test[0]:
-                      #  print("PL")
-                        result['Product/Service'] = "Legal Paternity"
+                        if Mother:
+                            result['Product/Service'] = "LPTTCS"
+                        elif Sibling:
+                             result['Product/Service'] = "LSTCS"
+                        elif GrandParent:
+                             result['Product/Service'] = "LGTCS"
+                        elif Aunt_Uncle:
+                             result['Product/Service'] = "LAUTCS"
+                        elif Cousin:
+                             result['Product/Service'] = "RelaC CS"
+                        else:
+                             result['Product/Service'] = "LPTMCS" 
                     else:
                         print ("Not found")             
             if "Report Date:" in line:

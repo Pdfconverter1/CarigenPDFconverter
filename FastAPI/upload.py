@@ -3,14 +3,15 @@ import requests
 import json
 import base64
 import urllib.parse
+import uuid
 from datetime import datetime
 
 # QuickBooks API Credentials
 CLIENT_ID = "ABknZy5LZwiMw4bgx7qOw1bG5nLsbwvc3fIWgIz989wyLMqSg1"
 CLIENT_SECRET = "I9mJ4PEgmc236UcWoKZXFz51U2wTfILi4yf6ff3H"
 REDIRECT_URI = "http://localhost:5000/callback"  # Set this in the Intuit Developer Portal
-AUTHORIZATION_CODE = "AB11734067400kXNj7VpsnpzaZPBFTvQes45Gz5wsalWe0f5JL"  # Replace with the authorization code obtained
-REFRESH_TOKEN = "AB11742793510T2H6wQtQjAjoAQJWCy2wPUCcDQduRiTxh2znA"  # Replace with the refresh token
+AUTHORIZATION_CODE = "AB11734136297J6PTn01weVKHcCVneNZ3DSUOE7dsbj9O2m9ev"  # Replace with the authorization code obtained
+REFRESH_TOKEN = "AB11742862405q9XwAP16kTOIZwcNphCTAnFPoOU3wrFgyarl4"  # Replace with the refresh token
 COMPANY_ID = "9341453609218497"  # Find this in QuickBooks
 
 # QuickBooks API Endpoints
@@ -20,6 +21,10 @@ INVOICE_ENDPOINT = f"{BASE_URL}/v3/company/{COMPANY_ID}/invoice"
 CUSTOMER_ENDPOINT = f"{BASE_URL}/v3/company/{COMPANY_ID}/customer"
 CUSTOMERQ_ENDPOINT = f"{BASE_URL}/v3/company/{COMPANY_ID}/query"
 ITEM_ENDPOINT = f"{BASE_URL}/v3/company/{COMPANY_ID}/query"
+BATCH_ENDPOINT = f"{BASE_URL}/v3/company/{COMPANY_ID}/batch"
+
+bId=0
+Batchrequest = []
 
 # Step 1: Get Access Token
 def get_access_token():
@@ -69,32 +74,33 @@ def read_excel(file_path):
     return df
 
 # Step 4: Format Data for QuickBooks
-def format_data(row,access_token):
+def format_data(customer_id, invoice_lines):
     # QuickBooks invoice payload
-    date_object = datetime.strptime(row["Service Date"],'%m/%d/%Y')
-    date = date_object.strftime('%Y-%m-%d')
-    item_info = get_service(row,access_token)
     invoice = {
         "CustomerRef": {
-            "name": row["Customer Name"],
-            "value": "100"
+            "value": "70"
         },
-        "Line": [
-            {
-                "DetailType": "SalesItemLineDetail",
-                "SalesItemLineDetail": {
-                    "ItemRef": {
-                        "name": row["Product/Service"],
-                        "value": item_info['Id'],
-                    },
-                    "ServiceDate": date
-                },
-                "Amount": item_info['UnitPrice'],
-                "Description": item_info['Description']
-            }
-        ]
+        "Line": invoice_lines
     }
     return invoice
+
+def create_invoice_line(row, access_token):
+    date_object = datetime.strptime(row["Service Date"], '%m/%d/%Y')
+    date = date_object.strftime('%Y-%m-%d')
+    item_info = get_service(row, access_token)
+    if not item_info:
+        raise Exception(f"Item information not found for {row['Product/Service']}")
+    
+    line = {
+        "DetailType": "SalesItemLineDetail",
+        "Amount": item_info['UnitPrice'],
+        "SalesItemLineDetail": {
+            "ItemRef": {"value": item_info['Id']},
+            "ServiceDate": date
+        },
+        "Description": item_info['Description'] + " " + row["Customer Name"]
+    }
+    return line    
 
 def create_customer(cusname, access_token):
     headers = {
@@ -180,7 +186,7 @@ def create_invoice(invoice, access_token):
         "Accept": "application/json",
         "Content-Type": "application/json"
     }
-    response = requests.post(INVOICE_ENDPOINT, headers=headers, data=json.dumps(invoice))
+    response = requests.post(BATCH_ENDPOINT, headers=headers, data=json.dumps({"BatchItemRequest":invoice}))
     return response.json()
 
 # Step 6: Main Function to Process Excel and Upload
@@ -190,17 +196,21 @@ def upload_invoices(file_path):
         access_token, refresh_token = refresh_access_token()
 
         df = read_excel(file_path)
+        invoice_lines =[]
         for index, row in df.iterrows():
             customer_info = create_customer(row, access_token)
             if customer_info:
-                invoice = format_data(row,access_token)
+                line = create_invoice_line(row,access_token)
+                invoice_lines.append(line)
                 # Update the CustomerRef with the correct ID
-                invoice["CustomerRef"]["value"] = customer_info["Id"]
-                print(invoice)
-                response = create_invoice(invoice, access_token)
-                print(f"Invoice for {customer_info['DisplayName']}: {response}")
+                #invoice["CustomerRef"]["value"] = customer_info["Id"]
+                #response = create_invoice(invoice, access_token)
+                print(f"Invoice for {customer_info['DisplayName']} added to batch")
             else:
                 print(f"Skipping invoice creation due to customer creation error: {row['Customer Name']}")
+        invoice = format_data(customer_info["Id"],invoice_lines) 
+        response = create_invoice([{"bId": str(uuid.uuid4()), "operation": "create", "Invoice": invoice}], access_token)
+        print(f"Batch Request sent. Response: {response}")        
     except Exception as e:
         print(f"Error: {e}")
 

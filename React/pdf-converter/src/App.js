@@ -36,7 +36,7 @@ function FolderToExcelConverter() {
         const formData = new FormData();
         formData.append("reference_name", referenceName); // Send the reference name to the backend
         setLoading(true);
-        setStatusMessage("Converting...");
+        setStatusMessage("Uploading...");
         
 
         try {
@@ -157,7 +157,7 @@ function FolderToExcelConverter() {
                 <button
                     onClick={() => handleInvoiceUpload("upload_invoices")}
                     disabled={loading || selectedFile === ""}> {/* Disable the button while loading */}
-                    {loading ? "Converting..." : "Upload Invoices"}
+                    {loading ? "Uploading..." : "Upload Invoices"}
                 </button>
             </div>
             <h3>Choose Existing File or Enter Name of New File</h3>

@@ -10,8 +10,8 @@ from datetime import datetime
 CLIENT_ID = "ABknZy5LZwiMw4bgx7qOw1bG5nLsbwvc3fIWgIz989wyLMqSg1"
 CLIENT_SECRET = "I9mJ4PEgmc236UcWoKZXFz51U2wTfILi4yf6ff3H"
 REDIRECT_URI = "http://localhost:5000/callback"  # Set this in the Intuit Developer Portal
-AUTHORIZATION_CODE = "AB11734405666iIo2ki5Tc2TEch7dMj8x1mFrjvkiDRfZ9N5EM"  # Replace with the authorization code obtained
-REFRESH_TOKEN = "AB11743131803FYaI1V6bjEVc1CmimQauD4Ied8c7y8hiwQUaf"  # Replace with the refresh token
+AUTHORIZATION_CODE = "AB117344608303kGrvGvkRXtNxe5pJnXcALVCQlw8HY1AU3ss0"  # Replace with the authorization code obtained
+REFRESH_TOKEN = "AB11743186943AtsE2g1DzOCBfgQPPuQdBJuGshEkUdJ5njAtC"  # Replace with the refresh token
 COMPANY_ID = "9341453609218497"  # Find this in QuickBooks
 
 # QuickBooks API Endpoints
@@ -87,17 +87,18 @@ def format_data(customer_id, invoice_lines):
 def create_invoice_line(row, access_token):
     date_object = datetime.strptime(row["Service Date"], '%m/%d/%Y')
     date = date_object.strftime('%Y-%m-%d')
-    item_info = get_service(row, access_token)
+    item_info = get_service(row, access_token)    
     if not item_info:
         raise Exception(f"Item information not found for {row['Product/Service']}")
     
     line = {
         "DetailType": "SalesItemLineDetail",
         "Amount": item_info['UnitPrice'],
-       # "PurchaseCost": item_info['PurchaseCost'],
         "SalesItemLineDetail": {
             "ItemRef": {"value": item_info['Id']},
-            "ServiceDate": date
+            "ServiceDate": date,
+            "UnitPrice": item_info['UnitPrice'],
+            "Qty": "1",
         },
         "Description": item_info['Description'] + " " + row["Customer Name"]
     }

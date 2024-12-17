@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
+import Select from 'react-select';
 import axios from 'axios';
 import './styles.css';
 
@@ -8,7 +9,34 @@ function FolderToExcelConverter() {
     const [statusMessage, setStatusMessage] = useState(""); // Message for status feedback
     const [selectedFile, setSelectedFile] = useState(""); // Stores the selected xlsx or csv file name
     const [textBoxValue, setTextBoxValue] = useState(""); // Stores the text entered in the text box
+    const [selectedClient, setSelectedClient] = useState(null);
     const controller = new AbortController();
+
+    const folderInputRef = useRef(null);
+    const fileInputRef = useRef(null);
+
+    // List of clients for the dropdown
+    const clientOptions = [
+        { value: 'Accutest Medical', label: 'Accutest Medical' },
+        { value: 'Accurate Medical Diagnostic Laboratory', label: 'Accurate Medical Diagnostic Laboratory' },
+        { value: 'Alpha Medical Laboratory Limited', label: 'Alpha Medical Laboratory Limited' },
+        { value: 'Andrews Memorial Hospital', label: 'Andrews Memorial Hospital' },
+        { value: 'Biomedical Caledonia Medical Laboratory', label: 'Biomedical Caledonia Medical Laboratory' },
+        { value: 'Central Medical Labs. Ltd', label: 'Central Medical Labs. Ltd' },
+        { value: 'Consolidated Health Laboratory', label: 'Consolidated Health Laboratory' },
+        { value: 'Chrissie Thomlinson Memorial Hospital', label: 'Chrissie Thomlinson Memorial Hospital' },
+        { value: 'Dr. Veronica Taylor Porter', label: 'Dr. Veronica Taylor Porter' },
+        { value: 'Fleet Diagnostic Laboratory Ltd', label: 'Fleet Diagnostic Laboratory Ltd' },
+        { value: 'Gene Medical Lab', label: 'Gene Medical Lab' },
+        { value: 'Laboratory Services and Consultation', label: 'Laboratory Services and Consultation' },
+        { value: 'La Falaise House Medical Labs', label: 'La Falaise House Medical Labs' },
+        { value: 'Medilab Service', label: 'Medilab Service' },
+        { value: 'Microlabs', label: 'Microlabs' },
+        { value: 'Mid Island Medical Lab', label: 'Mid Island Medical Lab' },
+        { value: 'Shimac Medical Laboratory', label: 'Shimac Medical Laboratory' },
+        { value: 'Spalding Diagnostix', label: 'Spalding Diagnostix' },
+        { value: 'Winchester Laboratory Services', label: 'Winchester Laboratory Services' },
+    ];
 
     const handleFolderChange = (event) => {
         const files = Array.from(event.target.files);
@@ -27,14 +55,32 @@ function FolderToExcelConverter() {
         }
     };
 
+
+    const resetInputs = () => {
+        setPdfFiles([]);          // Clear PDF files
+        setSelectedFile("");      // Clear selected file
+        setTextBoxValue("");      // Clear text input
+        setSelectedClient(null);  // Reset selected client
+
+        // Reset file inputs
+        if (folderInputRef.current) folderInputRef.current.value = "";
+        if (fileInputRef.current) fileInputRef.current.value = "";
+    };
+
+
     const handleTextChange = (event) => {
         setTextBoxValue(event.target.value); // Update text box value
+    };
+
+    const handleClientChange = (selectedOption) => {
+        setSelectedClient(selectedOption);
     };
 
     const handleInvoiceUpload = async(apiEndpoint) => { 
         const referenceName = selectedFile || textBoxValue; 
         const formData = new FormData();
         formData.append("reference_name", referenceName); // Send the reference name to the backend
+        formData.append("selected_client", selectedClient?.value || ""); // Include client selection
         setLoading(true);
         setStatusMessage("Uploading...");
         
@@ -45,28 +91,17 @@ function FolderToExcelConverter() {
                     "Content-Type": "multipart/form-data",
                 },
                 signal: controller.signal,
-            }).catch((error) => {
-                if (axios.isCancel(error)) {
-                    console.log("Failed to upload folder. Please select an existing file or enter the name for a new one");
-                } else {
-                    console.error("Error:", error);
-                }
             });
 
             setStatusMessage(response.data.message); // Update message based on the backend response
-            setPdfFiles([]);
-            setSelectedFile("");
-            setTextBoxValue("");
+       
 
         } catch (error) {
             console.error(`Error with ${apiEndpoint} conversion:`, error);
             setStatusMessage(`Failed to convert folder to ${apiEndpoint.replace("_", " ").toUpperCase()}.`);
         } finally {
             setLoading(false);
-            setPdfFiles([]);
-            setSelectedFile("");
-            setTextBoxValue("");
-
+            resetInputs();
         }
             
     }
@@ -82,7 +117,9 @@ function FolderToExcelConverter() {
         pdfFiles.forEach(file => formData.append("files", file));
 
         // Add either the selected file name or the entered text to the form data
-        const referenceName = selectedFile || textBoxValue; 
+        const text= textBoxValue.split(".");
+        const textValue = text[0].concat(".xlsx");
+        const referenceName = selectedFile || textValue; 
         if (referenceName ===""){
             console.error('Error with Document Name');
             setStatusMessage('Failed to convert folder. Please select an existing file or enter the name for a new one')
@@ -111,18 +148,13 @@ function FolderToExcelConverter() {
             });
 
             setStatusMessage(response.data.message); // Update message based on the backend response
-            setPdfFiles([]);
-            setSelectedFile("");
-            setTextBoxValue("");
 
         } catch (error) {
             console.error(`Error with ${apiEndpoint} conversion:`, error);
             setStatusMessage(`Failed to convert folder to ${apiEndpoint.replace("_", " ").toUpperCase()}.`);
         } finally {
             setLoading(false);
-            setPdfFiles([]);
-            setSelectedFile("");
-            setTextBoxValue("");
+            resetInputs();
 
         }
     };
@@ -156,10 +188,25 @@ function FolderToExcelConverter() {
                 </button>
                 <button
                     onClick={() => handleInvoiceUpload("upload_invoices")}
-                    disabled={loading || selectedFile === ""}> {/* Disable the button while loading */}
+                    disabled={loading || selectedFile === ""|| selectedClient === null}> {/* Disable the button while loading */}
                     {loading ? "Uploading..." : "Upload Invoices"}
                 </button>
             </div>
+
+            {/* Dropdown for Client Selection */}
+            <h3>Select a Client</h3>
+            <div className="client-select">
+            <Select
+                options={clientOptions}
+                value={selectedClient}
+                onChange={handleClientChange}
+                placeholder="Choose a client..."
+                isDisabled={loading}
+            />
+            {selectedClient && <p>Selected Client: {selectedClient.label}</p>}
+            </div>
+
+
             <h3>Choose Existing File or Enter Name of New File</h3>
             <label htmlFor="fileInput">Choose File</label>
             <input
@@ -172,6 +219,7 @@ function FolderToExcelConverter() {
             />
             {selectedFile && <p>Selected file: {selectedFile}</p>}
             <h3>OR</h3>
+            <div className="file-select">
             <input
                 type="text"
                 value={textBoxValue}
@@ -179,8 +227,10 @@ function FolderToExcelConverter() {
                 placeholder="Enter New File Name here..."
                 disabled={loading} // Disable while loading
             />
-            <p>Please add .xlsx to name entered</p>
+            </div>
+            {/* <p>Please add .xlsx to name entered</p> */}
             {textBoxValue !== "" && <p>Text Entered: {textBoxValue}</p>}
+
             {loading && <div className="loader"></div>} {/* Show loader when loading */}
             {statusMessage !== "" &&<div className="status">{statusMessage}</div>}
         </div>

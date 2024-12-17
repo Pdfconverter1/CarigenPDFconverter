@@ -99,14 +99,15 @@ async def convert_paternity(files: List[UploadFile] = File(...),reference_name: 
     return {"message": "PDFs processed and Excel file updated successfully."}
 
 @app.post("/upload_invoices/")
-async def upload_invoice(reference_name: str = Form(None)):
+async def upload_invoice(reference_name: str = Form(...),selected_client: str = Form(...)):
+    client_name = selected_client
     user_documents = Path.home() / "Documents"
     os.makedirs(user_documents, exist_ok=True)
     billing_dir = user_documents / "BILLING"
     os.makedirs(billing_dir, exist_ok=True)
     upload_doc = billing_dir / reference_name
     try:
-        upload_invoices(upload_doc)
+        upload_invoices(upload_doc,client_name)
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error uploading Invoice: {e}")
      # Return success message

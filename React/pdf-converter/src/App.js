@@ -179,7 +179,7 @@ function FolderToExcelConverter() {
                 <button
                     onClick={() => handleConversion("convert_folder")}
                     disabled={loading || pdfFiles.length === 0}> {/* Disable the button while loading */}
-                    {loading ? "Converting..." : "Convert Services"}
+                    {loading ? "Converting..." : "Convert Diagonstic"}
                 </button>
                 <button
                     onClick={() => handleConversion("convert_paternity")}

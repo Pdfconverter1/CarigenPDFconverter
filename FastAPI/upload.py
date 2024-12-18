@@ -7,8 +7,8 @@ import uuid
 from datetime import datetime
 
 # QuickBooks API Credentials
-CLIENT_ID = "ABknZy5LZwiMw4bgx7qOw1bG5nLsbwvc3fIWgIz989wyLMqSg1"
-CLIENT_SECRET = "I9mJ4PEgmc236UcWoKZXFz51U2wTfILi4yf6ff3H"
+CLIENT_ID = "ABxMaHGoB0TBydvLluSHndsrbB9K7pcU9X8TrW5QKASxAcngrm"
+CLIENT_SECRET = "yaJqDR74DNIF8vaqwO0GDT9a96ioQtK9ppaspqWn"
 REDIRECT_URI = "http://localhost:5000/callback"  # Set this in the Intuit Developer Portal
 AUTHORIZATION_CODE = "AB117344608303kGrvGvkRXtNxe5pJnXcALVCQlw8HY1AU3ss0"  # Replace with the authorization code obtained
 REFRESH_TOKEN = "AB11743186943AtsE2g1DzOCBfgQPPuQdBJuGshEkUdJ5njAtC"  # Replace with the refresh token

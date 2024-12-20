@@ -7,15 +7,15 @@ import uuid
 from datetime import datetime
 
 # QuickBooks API Credentials
-CLIENT_ID = "ABxMaHGoB0TBydvLluSHndsrbB9K7pcU9X8TrW5QKASxAcngrm"
-CLIENT_SECRET = "yaJqDR74DNIF8vaqwO0GDT9a96ioQtK9ppaspqWn"
+CLIENT_ID = "ABrJy7NaQIbWjpU7aay8ToqR3rDWf2Woepxp4pzLFkSheDkDgM"
+CLIENT_SECRET = "snjRwOEhZLGFeaIIYSVi6dsVQbAg6B5e1Mg9HaEb"
 REDIRECT_URI = "http://localhost:5000/callback"  # Set this in the Intuit Developer Portal
-AUTHORIZATION_CODE = "AB117344608303kGrvGvkRXtNxe5pJnXcALVCQlw8HY1AU3ss0"  # Replace with the authorization code obtained
-REFRESH_TOKEN = "AB11743186943AtsE2g1DzOCBfgQPPuQdBJuGshEkUdJ5njAtC"  # Replace with the refresh token
-COMPANY_ID = "9341453609218497"  # Find this in QuickBooks
+AUTHORIZATION_CODE = "AB11734656458I7wXclg3VViQXlc08x2QkPIwR1Oa8cf1Rcout"  # Replace with the authorization code obtained
+REFRESH_TOKEN = "AB11743382582RoruSfaJgVVgBuz90MAPyQb5SiuxDheKxEnYX"  # Replace with the refresh token
+COMPANY_ID = "9130350083474706"  # Find this in QuickBooks
 
 # QuickBooks API Endpoints
-BASE_URL = "https://sandbox-quickbooks.api.intuit.com"
+BASE_URL = "https://quickbooks.api.intuit.com/"
 TOKEN_ENDPOINT = "https://oauth.platform.intuit.com/oauth2/v1/tokens/bearer"
 INVOICE_ENDPOINT = f"{BASE_URL}/v3/company/{COMPANY_ID}/invoice"
 CUSTOMER_ENDPOINT = f"{BASE_URL}/v3/company/{COMPANY_ID}/customer"
@@ -25,6 +25,21 @@ BATCH_ENDPOINT = f"{BASE_URL}/v3/company/{COMPANY_ID}/batch"
 
 bId=0
 Batchrequest = []
+
+query = """
+    SELECT Id, DisplayName 
+    FROM Customer 
+    WHERE DisplayName IN (
+        'Accutest Medical','Accurate Medical Diagnostic Laboratory','Alpha Medical Laboratory Limited',
+        'Andrews Memorial Hospital','Biomedical Caledonia Medical Laboratory','Central Medical Labs. Ltd',
+        'Consolidated Health Laboratory','Chrissie Thomlinson Memorial Hospital','Dr. Veronica Taylor Porter',
+        'Fleet Diagnostic Laboratory Ltd','Gene Medical Lab','Laboratory Services and Consultation',
+        'La Falaise House Medical Labs','Medilab Service','Microlabs','Mid Island Medical Lab',
+        'Shimac Medical Laboratory','Spalding Diagnostix','Winchester Laboratory Services'
+    )
+"""
+encoded_query = urllib.parse.quote(query.strip())
+url = f"{CUSTOMERQ_ENDPOINT}?query={encoded_query}"
 
 # Step 1: Get Access Token
 def get_access_token():
@@ -117,26 +132,14 @@ def create_customer(cusname, access_token):
     if customer_name in existing_customers:
         print(f"Customer '{customer_name}' already exists.")
         return {"Id": existing_customers[customer_name], "DisplayName": customer_name}
-    customer = {
-        "FullyQualifiedName": customer_name,
-        "DisplayName": customer_name
-    }
-
-    response = requests.post(CUSTOMER_ENDPOINT, headers=headers, data=json.dumps(customer))
-    if response.status_code == 200:
-        new_customer = response.json()['Customer']
-        print(f"Customer '{customer_name}' created successfully.")
-        return {"Id": new_customer['Id'], "DisplayName": new_customer['DisplayName']}
-    else:
-        print(f"Error creating customer '{customer_name}': {response.text}")
-        return None
     
 def get_existing_customers(access_token):
     headers = {
         "Authorization": f"Bearer {access_token}",
         "Accept": "application/json"
     }
-    response = requests.get(f"{CUSTOMERQ_ENDPOINT}?query=SELECT Id, DisplayName FROM Customer", headers=headers)
+    response = requests.get(url, headers=headers)
+    print(response.text)
     if response.status_code == 200:
         return {customer['DisplayName']: customer['Id'] for customer in response.json().get('QueryResponse', {}).get('Customer', [])}
     else:
@@ -199,6 +202,7 @@ def upload_invoices(file_path,client_name):
 
     df = read_excel(file_path)
     invoice_lines =[]
+    print(client_name)
     customer_info = create_customer(client_name, access_token)
     for index, row in df.iterrows():
         if customer_info:

@@ -52,7 +52,9 @@ def process_pdf(pathname, filename):
                 print("auncle")    
             elif "Cousin:" in i:
                 Cousin = True
-                print("Cousin")              
+                print("Cousin")        
+
+                # alleged mother MATERNITY TEST LEGAL CS      
 
         for line in filtered_lines:
             if "Alleged Father:" in line:
@@ -91,13 +93,13 @@ def process_pdf(pathname, filename):
                         elif Sibling:
                              result['Product/Service'] = "LSTCS"
                         elif GrandParent:
-                             result['Product/Service'] = "LGTCS"
+                             result['Product/Service'] = "GRANDPARENTAGE  LEGAL CS"
                         elif Aunt_Uncle:
-                             result['Product/Service'] = "LAUTCS"
+                             result['Product/Service'] = "AUNT/UNCLE  LEGAL CS"
                         elif Cousin:
                              result['Product/Service'] = "RelaC CS"
                         else:
-                             result['Product/Service'] = "LPTMCS" 
+                             result['Product/Service'] = "LPTM CS" 
                     else:
                         print ("Not found")             
             if "Report Date:" in line:

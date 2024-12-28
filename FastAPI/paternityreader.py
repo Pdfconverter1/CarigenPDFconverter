@@ -5,8 +5,8 @@ import re
 from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime
 
-ID = ["CARIGEN Case", "Alleged Father", "Report Date","Niece:","Nephew:","Grandson:","Granddaughter:","Sibling:","Half sibling:","Cousin:","Mother:"]
-Relation =["Niece:","Nephew:","Grandson:","Granddaughter:","Sibling:","Half sibling:","Cousin:"]
+ID = ["CARIGEN Case", "Alleged Father","Report Date","Niece:","Nephew:","Grandson:","Granddaughter:","Sibling:","Half sibling:","Cousin:","Mother:"]
+Relation =["Niece:","Nephew:","Grandson:","Granddaughter:","Sibling:","Half sibling:","Cousin:","Son:","Daughter:","Mother:"]
 
 
 def process_pdf(pathname, filename):
@@ -18,6 +18,7 @@ def process_pdf(pathname, filename):
     GrandParent = False
     Aunt_Uncle = False
     Cousin = False
+    Alleged_Father = False
     
     try:
         with pdfplumber.open(pathname) as pdf:
@@ -32,6 +33,9 @@ def process_pdf(pathname, filename):
             if "Mother:" in i:
                 Mother = True
                 print("Mother")
+            elif  "Alleged Father:" in i:
+                Alleged_Father = True
+                print("Alleged Father")    
             elif  "Sibling:" in i:
                 Sibling = True
                 print("Sibling")
@@ -89,7 +93,10 @@ def process_pdf(pathname, filename):
                              result['Product/Service'] = "PPTMCS"           
                     elif "PL" in test[0]:
                         if Mother:
-                            result['Product/Service'] = "LPTTCS"
+                            if Alleged_Father:
+                                result['Product/Service'] = "LPTTCS"
+                            else:
+                                result['Product/Service'] = "MATERNITY TEST LEGAL CS"    
                         elif Sibling:
                              result['Product/Service'] = "LSTCS"
                         elif GrandParent:

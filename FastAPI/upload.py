@@ -5,17 +5,21 @@ import base64
 import urllib.parse
 import uuid
 from datetime import datetime
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
 
 # QuickBooks API Credentials
-CLIENT_ID = "ABrJy7NaQIbWjpU7aay8ToqR3rDWf2Woepxp4pzLFkSheDkDgM"
-CLIENT_SECRET = "snjRwOEhZLGFeaIIYSVi6dsVQbAg6B5e1Mg9HaEb"
+CLIENT_ID = os.getenv('CLIENT_ID')
+CLIENT_SECRET = os.getenv('CLIENT_SECRET')
 REDIRECT_URI = "http://localhost:5000/callback"  # Set this in the Intuit Developer Portal
-AUTHORIZATION_CODE = "AB11734656458I7wXclg3VViQXlc08x2QkPIwR1Oa8cf1Rcout"  # Replace with the authorization code obtained
-REFRESH_TOKEN = "AB11743382582RoruSfaJgVVgBuz90MAPyQb5SiuxDheKxEnYX"  # Replace with the refresh token
-COMPANY_ID = "9130350083474706"  # Find this in QuickBooks
+AUTHORIZATION_CODE = os.getenv('AUTHORIZATION_CODE')
+REFRESH_TOKEN = os.getenv('REFRESH_TOKEN')
+COMPANY_ID = "9341453609218497"#"9130350083474706"  # Find this in QuickBooks
 
 # QuickBooks API Endpoints
-BASE_URL = "https://quickbooks.api.intuit.com/"
+BASE_URL = "https://sandbox-quickbooks.api.intuit.com"#"https://quickbooks.api.intuit.com/"
 TOKEN_ENDPOINT = "https://oauth.platform.intuit.com/oauth2/v1/tokens/bearer"
 INVOICE_ENDPOINT = f"{BASE_URL}/v3/company/{COMPANY_ID}/invoice"
 CUSTOMER_ENDPOINT = f"{BASE_URL}/v3/company/{COMPANY_ID}/customer"

@@ -2,10 +2,12 @@ Install Node js at https://nodejs.org/en/download/prebuilt-installer
 
 Once that is completed
 
-Install python 3.9 found at https://www.python.org/downloads/release/python-3120/
+Install python 3.12 found at https://www.python.org/downloads/release/python-3120/
 
 Check the "add to path" box at the start of the installation
 
 Once completed
 
 Run the Start.exe as an admin
+
+

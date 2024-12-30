@@ -16,10 +16,10 @@ CLIENT_SECRET = os.getenv('CLIENT_SECRET')
 REDIRECT_URI = "http://localhost:5000/callback"  # Set this in the Intuit Developer Portal
 AUTHORIZATION_CODE = os.getenv('AUTHORIZATION_CODE')
 REFRESH_TOKEN = os.getenv('REFRESH_TOKEN')
-COMPANY_ID = "9341453609218497"#"9130350083474706"  # Find this in QuickBooks
+COMPANY_ID = "9130350083474706"  # Find this in QuickBooks
 
 # QuickBooks API Endpoints
-BASE_URL = "https://sandbox-quickbooks.api.intuit.com"#"https://quickbooks.api.intuit.com/"
+BASE_URL = "https://quickbooks.api.intuit.com/"
 TOKEN_ENDPOINT = "https://oauth.platform.intuit.com/oauth2/v1/tokens/bearer"
 INVOICE_ENDPOINT = f"{BASE_URL}/v3/company/{COMPANY_ID}/invoice"
 CUSTOMER_ENDPOINT = f"{BASE_URL}/v3/company/{COMPANY_ID}/customer"

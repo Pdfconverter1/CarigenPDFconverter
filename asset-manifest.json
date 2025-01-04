@@ -1,16 +1,16 @@
 {
   "files": {
     "main.css": "/CarigenPDFconverter/static/css/main.3264dbaf.css",
-    "main.js": "/CarigenPDFconverter/static/js/main.f1522f77.js",
+    "main.js": "/CarigenPDFconverter/static/js/main.c60f68b7.js",
     "static/js/453.20fde1cc.chunk.js": "/CarigenPDFconverter/static/js/453.20fde1cc.chunk.js",
     "static/media/logo.png": "/CarigenPDFconverter/static/media/logo.35f5d9e48c1d7a55114b.png",
     "index.html": "/CarigenPDFconverter/index.html",
     "main.3264dbaf.css.map": "/CarigenPDFconverter/static/css/main.3264dbaf.css.map",
-    "main.f1522f77.js.map": "/CarigenPDFconverter/static/js/main.f1522f77.js.map",
+    "main.c60f68b7.js.map": "/CarigenPDFconverter/static/js/main.c60f68b7.js.map",
     "453.20fde1cc.chunk.js.map": "/CarigenPDFconverter/static/js/453.20fde1cc.chunk.js.map"
   },
   "entrypoints": [
     "static/css/main.3264dbaf.css",
-    "static/js/main.f1522f77.js"
+    "static/js/main.c60f68b7.js"
   ]
 }

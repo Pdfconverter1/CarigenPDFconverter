@@ -51,14 +51,7 @@ if %errorlevel% neq 0 (
    exit /b 1
   )
 
-
 start cmd /k "cd /d %BASEDIR%FastAPI && python -m uvicorn main:app --reload"
 
-REM Navigate to frontend folder
-cd /d "%BASEDIR%React\pdf-converter"
-
-start cmd /k "cd /d %BASEDIR%React\pdf-converter && npm start"
-
-REM Notify user
-echo Both backend and frontend have been started in separate terminals.
+echo Backend has been started.
 pause

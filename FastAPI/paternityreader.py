@@ -136,10 +136,16 @@ def paternityconvert(filepath, output_folder,fname):
     """Convert PDFs to Excel."""
     # Process all PDFs in parallel
     results = process_pdfs_in_parallel(filepath)
+    temp = []
+    res = dict()
+    for key, val in results.items():
+        if val not in temp:
+            temp.append(val)
+            res[key] = val        
 
     # Convert results to a DataFrame
     # df = pd.DataFrame.from_dict(results, orient='index', columns=['Name', 'Test Panel', 'Date Reported'])
-    new_df = pd.DataFrame.from_dict(results, orient='index')
+    new_df = pd.DataFrame.from_dict(res, orient='index')
 
 
     # Get the current month/year based filename

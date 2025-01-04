@@ -40,12 +40,14 @@ function FolderToExcelConverter() {
 
     const handleFolderChange = (event) => {
         const files = Array.from(event.target.files);
+        event.target.value = null
         const pdfFiles = files.filter(file => file.type === "application/pdf");
         setPdfFiles(pdfFiles);
     };
 
     const handleFileChange = (event) => {
         const file = event.target.files[0];
+        event.target.value = null
         if (file && (file.type === "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" || file.type === "text/csv")) {
             setSelectedFile(file.name); // Store the selected file name
             setStatusMessage(`Selected file: ${file.name}`);
@@ -57,7 +59,7 @@ function FolderToExcelConverter() {
 
 
     const resetInputs = () => {
-        setPdfFiles([]);          // Clear PDF files
+        setPdfFiles([]);          // Clear PDF file
         setSelectedFile("");      // Clear selected file
         setTextBoxValue("");      // Clear text input
         setSelectedClient(null);  // Reset selected client

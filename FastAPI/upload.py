@@ -172,7 +172,7 @@ def get_service(service_name, access_token):
     if response.status_code == 200:
         items = response.json().get('QueryResponse', {}).get('Item', [])
         if not items:
-            print(f"Item '{servicen}' not found.")
+            print(f"Item '{servicen}' not found!")
             return {}
 
         # Assuming the first match is correct

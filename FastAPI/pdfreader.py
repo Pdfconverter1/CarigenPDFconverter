@@ -5,7 +5,7 @@ import re
 from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime
 
-ID = ["Customer", "Panel:", "Date Reported"]
+ID = ["customername", "testpanel", "Date Reported"]
 
 Services = {"STI 9":"STI-9 CS","CT/NG":"CTNGT","QUAD":"QUAD CS","NEURO 9":"NEURO 9 CS","CA/GV":"CA/GV CS","CANP":"CANP","SYPH":"SYPH CS","HIV QUALITATIVE":"HIV QUAL CS",
             "HPV SCREEN AND TYPING":"HPV SCREEN CS","HPV SCREEN":"HPV SCREEN CS","BACTERAIL VAGINOSIS":"BVCS","CHIK":"CHIK CS","CMV":"CMV PANEL CS","DENGUE":"DENGUE CS",
@@ -22,17 +22,30 @@ def process_pdf(pathname, filename):
             text = first_page.extract_text_simple(x_tolerance=3, y_tolerance=3)
 
         lines = text.split("\n")
-        filtered_lines = [line for line in lines if any(id_ in line for id_ in ID)]
+        #filtered_lines = [line for line in lines if any(id_ in line for id_ in ID)]
+        filtered_lines = []
+        for line in lines:
+           temp = line.split(":",1)
+           if len(temp) > 1:
+            temp[0] = temp[0].replace(" ","")
+            temp2 = temp[0].lower() + ":" + temp[1]
+            if any(id_ in temp2 for id_ in ID):
+                filtered_lines.append(temp2)
+        
+
+        # print(lines)
+        # print("_______________________________________________________________________________________________________________________________________")
+        # print(filtered_lines)
 
         for line in filtered_lines:
-            if "Customer" in line:
-                result['Customer Name'] = re.sub(r"(Customer Name:\s*|\b\w+:\s*)", "", line).strip()
-            elif "Panel:" in line:
-                test = re.search(r"\w+\s*Panel:\s*(.*?)(?=\s+\b\w+\s\w+:|$)", line)
+            if ID[0] in line:
+                result['Customer Name'] = re.sub(r"(customername:\s*|\b\w+:\s*)", "", line).strip()
+            elif ID[1] in line:
+                test = re.search(r"testpanel:\s*(.*?)(?=\s+\b\w+\s\w+:|$)", line)
                 if test:
                     panel = test.group(1).strip()
                     result['Product/Service'] = Services[panel]    
-            elif "Date Reported" in line:
+            elif ID[2] in line:
                 match = re.search(r"Date Reported:\s*(\d{2}/\d{2}/\d{4})", line)
                 if match:
                     dateobj = datetime.strptime(match.group(1),'%m/%d/%Y')
@@ -53,21 +66,22 @@ def process_pdfs_in_parallel(filepaths):
             results[filename] = data
     return results
 
-# def get_xlsx_filename():
-#     """Generate the filename based on the current month and year."""
-#     today = datetime.today()
-#     month_year = today.strftime("%Y-%m")  # Get the current month and year as 'YYYY-MM'
-#     filename = f"Carigen_Report_{month_year}.xlsx"
-#     return filename
 
 def pdfconvert(filepath, output_folder,fname):
     """Convert PDFs to Excel."""
     # Process all PDFs in parallel
     results = process_pdfs_in_parallel(filepath)
+    temp = []
+    res = dict()
+    for key, val in results.items():
+        if val not in temp:
+            temp.append(val)
+            res[key] = val        
+ 
 
     # Convert results to a DataFrame
     # df = pd.DataFrame.from_dict(results, orient='index', columns=['Name', 'Test Panel', 'Date Reported'])
-    new_df = pd.DataFrame.from_dict(results, orient='index')
+    new_df = pd.DataFrame.from_dict(res, orient='index')
 
     # Get the current month/year based filename
     #xlsx_filename = get_xlsx_filename()
@@ -89,24 +103,5 @@ def pdfconvert(filepath, output_folder,fname):
 
     # Save the updated DataFrame back to the Excel file
     combined_df.to_excel(output_xlsx_path, sheet_name='Carigen', index=False)
-    
-    # if os.path.exists(output_xlsx_path):
-    #     # If the file exists, append the data to the existing file
-    #     print(f"Appending to existing file: {output_xlsx_path}")
-    #     try:
-    #         workbook = load_workbook(output_xlsx_path)
-    #         sheet = workbook.active
-    #         for row in dataframe_to_rows(df, index=False, header=False):
-    #             sheet.append(row)
-    #         workbook.save(output_xlsx_path)
-    #     except Exception as e:
-    #         raise Exception(f"Error appending data: {e}")
-    # else:
-    #     # If the file does not exist, create a new one
-    #     print(f"Creating new file: {output_xlsx_path}")
-    #     try:
-    #         df.to_excel(output_xlsx_path, sheet_name='Carigen', index=False)
-    #     except Exception as e:
-    #         raise Exception(f"Error creating file: {e}")
 
     print(f"PDF conversion to Excel completed: {output_xlsx_path}")

@@ -1,19 +1,19 @@
-import React, { useState, useRef } from 'react';
+import React, { useState } from 'react';
 import Select from 'react-select';
 import axios from 'axios';
 import './styles.css';
+import { IclientObj, ITokenObj } from './utils/interfaces';
+import { REFRESHTOKEN } from './utils/constants';
+import dayjs from 'dayjs';
 
-function FolderToExcelConverter() {
-    const [pdfFiles, setPdfFiles] = useState([]);
+const  App = ()  => {
+    const [pdfFiles, setPdfFiles] = useState<File[]>([]);
     const [loading, setLoading] = useState(false); // State to track loading status
     const [statusMessage, setStatusMessage] = useState(""); // Message for status feedback
     const [selectedFile, setSelectedFile] = useState(""); // Stores the selected xlsx or csv file name
     const [textBoxValue, setTextBoxValue] = useState(""); // Stores the text entered in the text box
-    const [selectedClient, setSelectedClient] = useState(null);
+    const [selectedClient, setSelectedClient] = useState<IclientObj | null>();
     const controller = new AbortController();
-
-    const folderInputRef = useRef(null);
-    const fileInputRef = useRef(null);
 
     // List of clients for the dropdown
     const clientOptions = [
@@ -41,16 +41,16 @@ function FolderToExcelConverter() {
         { value: 'Winchester Laboratory Services', label: 'Winchester Laboratory Services' },
     ];
 
-    const handleFolderChange = (event) => {
-        const files = Array.from(event.target.files);
-        event.target.value = null
+    const handleFolderChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+        const files = event.target.files ? Array.from(event.target.files) : []
+        event.target.value = ''
         const pdfFiles = files.filter(file => file.type === "application/pdf");
         setPdfFiles(pdfFiles);
     };
 
-    const handleFileChange = (event) => {
-        const file = event.target.files[0];
-        event.target.value = null
+    const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+        const file = event.target.files ? event.target.files[0] : null;
+        event.target.value = ''
         if (file && (file.type === "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" || file.type === "text/csv")) {
             setSelectedFile(file.name); // Store the selected file name
             setStatusMessage(`Selected file: ${file.name}`);
@@ -68,50 +68,84 @@ function FolderToExcelConverter() {
         setSelectedClient(null);  // Reset selected client
 
         // Reset file inputs
-        if (folderInputRef.current) folderInputRef.current.value = "";
-        if (fileInputRef.current) fileInputRef.current.value = "";
     };
 
 
-    const handleTextChange = (event) => {
+    const handleTextChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         setTextBoxValue(event.target.value); // Update text box value
     };
 
-    const handleClientChange = (selectedOption) => {
+    const handleClientChange = (selectedOption: any) => {
         setSelectedClient(selectedOption);
     };
 
-    const handleInvoiceUpload = async(apiEndpoint) => { 
-        const referenceName = selectedFile || textBoxValue; 
-        const formData = new FormData();
-        formData.append("reference_name", referenceName); // Send the reference name to the backend
-        formData.append("selected_client", selectedClient?.value || ""); // Include client selection
-        setLoading(true);
-        setStatusMessage("Uploading...");
-        
+    const handleInvoiceUpload = async(apiEndpoint: string) => { 
+        let refreshToken:ITokenObj | null = null
+        if(localStorage.getItem(REFRESHTOKEN)) {
+            refreshToken =  JSON.parse(localStorage.getItem(REFRESHTOKEN) ?? '')
+            const tokensExpired = dayjs().isAfter(refreshToken?.expiryDate)
+            if (tokensExpired) {
+                try {
+                        const response = await axios.get(`http://127.0.0.1:8000/refresh_token/?reftkn=${refreshToken?.refreshtoken}`)
+                        refreshToken = response.data
+                        if(refreshToken) {
+                            refreshToken.expiryDate = dayjs().add(Number(refreshToken.expiryDate),'second')
+                            localStorage.setItem(REFRESHTOKEN, JSON.stringify(refreshToken))
+                        }
+                        
+                    }
+                catch (error) {
+                    console.error(`Error with token refresh:`, error);
+                    setStatusMessage(`Failed to refresh access token.`);
+                }
+            } else {
+                
+            }
 
-        try {
-            const response = await axios.post(`http://127.0.0.1:8000/${apiEndpoint}/`, formData, {
-                headers: {
-                    "Content-Type": "multipart/form-data",
-                },
-                signal: controller.signal,
-            });
-
-            setStatusMessage(response.data.message); // Update message based on the backend response
-       
-
-        } catch (error) {
-            console.error(`Error with ${apiEndpoint} conversion:`, error);
-            setStatusMessage(`Failed to convert folder to ${apiEndpoint.replace("_", " ").toUpperCase()}.`);
-        } finally {
-            setLoading(false);
-            resetInputs();
+        } else {
+            try {
+                const response = await axios.get(`http://127.0.0.1:8000/generate_token/`)
+                refreshToken = response.data
+                localStorage.setItem(REFRESHTOKEN, JSON.stringify(refreshToken))
+            } catch (error) {
+                console.error(`Error with token creation:`, error);
+                setStatusMessage(`Failed to create refresh token.`);
+            }
         }
+        if (refreshToken) {
+            const referenceName = selectedFile || textBoxValue; 
+            const formData = new FormData();
+            formData.append("reference_name", referenceName); // Send the reference name to the backend
+            formData.append("selected_client", selectedClient?.value || ""); // Include client selection
+            formData.append("access_token",refreshToken.accessToken) 
+            setLoading(true);
+            setStatusMessage("Uploading...");
             
+    
+            try {
+                const response = await axios.post(`http://127.0.0.1:8000/${apiEndpoint}/`, formData, {
+                    headers: {
+                        "Content-Type": "multipart/form-data",
+                    },
+                    signal: controller.signal,
+                });
+    
+                setStatusMessage(response.data.message); // Update message based on the backend response
+           
+    
+            } catch (error) {
+                console.error(`Error with ${apiEndpoint} conversion:`, error);
+                setStatusMessage(`Failed to convert folder to ${apiEndpoint.replace("_", " ").toUpperCase()}.`);
+            } finally {
+                setLoading(false);
+                resetInputs();
+            }   
+        }
+
+        
     }
 
-    const handleConversion = async (apiEndpoint) => {
+    const handleConversion = async (apiEndpoint: string) => {
         
         if (pdfFiles.length === 0) {
             setStatusMessage("Please select PDF files first.");
@@ -151,8 +185,8 @@ function FolderToExcelConverter() {
                     console.error("Error:", error);
                 }
             });
-
-            setStatusMessage(response.data.message); // Update message based on the backend response
+            
+            setStatusMessage(response?.data.message); // Update message based on the backend response
 
         } catch (error) {
             console.error(`Error with ${apiEndpoint} conversion:`, error);
@@ -175,7 +209,7 @@ function FolderToExcelConverter() {
                 id="folderInput"
                 type="file"
                 style={{ display: "none" }}
-                webkitdirectory="true"
+                
                 onChange={handleFolderChange}
                 disabled={loading} // Disable the folder selection while loading
             />
@@ -241,5 +275,4 @@ function FolderToExcelConverter() {
         </div>
     );
 }
-
-export default FolderToExcelConverter;
+export default App;

@@ -6,6 +6,14 @@ import { IclientObj, ITokenObj } from './utils/interfaces';
 import { REFRESHTOKEN } from './utils/constants';
 import dayjs from 'dayjs';
 
+declare module 'react' {
+    interface InputHTMLAttributes<T> extends HTMLAttributes<T> {
+      // extends React's HTMLAttributes
+      directory?: string;
+      webkitdirectory?: string;
+    }
+  }
+
 const  App = ()  => {
     const [pdfFiles, setPdfFiles] = useState<File[]>([]);
     const [loading, setLoading] = useState(false); // State to track loading status
@@ -106,8 +114,10 @@ const  App = ()  => {
             try {
                 const response = await axios.get(`http://127.0.0.1:8000/generate_token/`)
                 refreshToken = response.data
-                localStorage.setItem(REFRESHTOKEN, JSON.stringify(refreshToken))
-            } catch (error) {
+                if(refreshToken) {
+                    refreshToken.expiryDate = dayjs().add(Number(refreshToken.expiryDate),'second')
+                    localStorage.setItem(REFRESHTOKEN, JSON.stringify(refreshToken))
+                }            } catch (error) {
                 console.error(`Error with token creation:`, error);
                 setStatusMessage(`Failed to create refresh token.`);
             }
@@ -198,6 +208,7 @@ const  App = ()  => {
         }
     };
 
+    
     return (
         <div className="container">
             <div className="logo-container">
@@ -209,7 +220,7 @@ const  App = ()  => {
                 id="folderInput"
                 type="file"
                 style={{ display: "none" }}
-                
+                webkitdirectory = {"true"}
                 onChange={handleFolderChange}
                 disabled={loading} // Disable the folder selection while loading
             />

@@ -37,6 +37,7 @@ function FolderToExcelConverter() {
         { value: 'Quality Diagnostics', label: 'Quality Diagnostics' },
         { value: 'Shimac Medical Laboratory', label: 'Shimac Medical Laboratory' },
         { value: 'Spalding Diagnostix', label: 'Spalding Diagnostix' },
+        { value: 'UHWI Blood Bank', label: 'UHWI Blood Bank' },
         { value: 'Winchester Laboratory Services', label: 'Winchester Laboratory Services' },
     ];
 

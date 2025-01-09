@@ -106,7 +106,7 @@ async def convert_paternity(files: List[UploadFile] = File(...),reference_name: 
     return {"message": "PDFs processed and Excel file updated successfully."}
 
 @app.post("/upload_invoices/")
-async def upload_invoice(reference_name: str = Form(...),selected_client: str = Form(...)):
+async def upload_invoice(reference_name: str = Form(...),selected_client: str = Form(...),access_token: str = Form(...)):
     client_name = selected_client
     user_documents = Path.home() / "Documents"
     os.makedirs(user_documents, exist_ok=True)
@@ -114,7 +114,7 @@ async def upload_invoice(reference_name: str = Form(...),selected_client: str = 
     os.makedirs(billing_dir, exist_ok=True)
     upload_doc = billing_dir / reference_name
     try:
-        upload_invoices(upload_doc,client_name)
+        upload_invoices(upload_doc,client_name,access_token)
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error uploading Invoice: {e}")
      # Return success message
@@ -123,41 +123,42 @@ async def upload_invoice(reference_name: str = Form(...),selected_client: str = 
 @app.get("/generate_token/")
 
 async def get_access_token():
-    #Instantiate client
-    auth_client = AuthClient(
-        os.getenv("CLIENT_ID"),
-        os.getenv("CLIENT_SECRET"),
-        "https://pdfconverter1.github.io/CarigenPDFconverter/",
-        "production", # “sandbox” or “production”
-    )
-
- #Prepare scopes
-    scopes = [
-        Scopes.ACCOUNTING, Scopes.ADDRESS, Scopes.PHONE,
-        Scopes.OPENID,Scopes.PROFILE, Scopes.EMAIL
-    ]
-
- #Get authorization URL
-    auth_url = auth_client.get_authorization_url(scopes)
-
-    return auth_url
-
+    headers = {
+        "Authorization": "Basic " + base64.b64encode(f"{os.getenv("CLIENT_ID")}:{os.getenv("CLIENT_SECRET")}".encode()).decode(),
+        "Content-Type": "application/x-www-form-urlencoded"
+    }
     
-    # headers = {
-    #     "Authorization": "Basic " + base64.b64encode(f"{os.getenv("CLIENT_ID")}:{os.getenv("CLIENT_SECRET")}".encode()).decode(),
-    #     "Content-Type": "application/x-www-form-urlencoded"
-    # }
+    data = {
+        "grant_type": "authorization_code",
+        "code": os.getenv("AUTHORIZATION_CODE"),
+        "redirect_uri": "https://developer.intuit.com/v2/OAuth2Playground/RedirectUrl"
+    }
     
-    # data = {
-    #     "grant_type": "authorization_code",
-    #     "code": os.getenv("AUTHORIZATION_CODE"),
-    #     "redirect_uri": "http://localhost:5000/callback"
-    # }
+    response = requests.post("https://oauth.platform.intuit.com/oauth2/v1/tokens/bearer", headers=headers, data=data)
+    tokens = response.json()
     
-    # response = requests.post("https://oauth.platform.intuit.com/oauth2/v1/tokens/bearer", headers=headers, data=data)
-    # tokens = response.json()
+    if "access_token" in tokens:
+        return {"accessToken":tokens["access_token"], "refeshtoken":tokens["refresh_token"], "expiryDate":tokens["expires_in"]}
+    else:
+        raise Exception(f"Error fetching access token: {tokens}")
+
+@app.get("/refresh_token/")
+async def refresh(reftkn: str=""):
+    headers = {
+        "Authorization": "Basic " + base64.b64encode(f"{os.getenv("CLIENT_ID")}:{os.getenv("CLIENT_SECRET")}".encode()).decode(),
+        "Content-Type": "application/x-www-form-urlencoded"
+    }
     
-    # if "accessToken" in tokens:
-    #     return {"accessToken":tokens["accessToken"], "refeshtoken":tokens["refreshToken"], "expiryDate":tokens["expires_in"], "tokenexpires_in":tokens["x_refresh_token_expires_in"]}
-    # else:
-    #     raise Exception(f"Error fetching access token: {tokens}")
+    data = {
+        "grant_type": "refresh_token",
+        "refresh_token": reftkn
+    }
+    
+    response = requests.post("https://oauth.platform.intuit.com/oauth2/v1/tokens/bearer", headers=headers, data=data)
+    tokens = response.json()
+    print(tokens)
+    
+    if "access_token" in tokens:
+        return {"accessToken":tokens["access_token"], "refeshtoken":tokens["refresh_token"], "expiryDate":tokens["expires_in"]}
+    else:
+        raise Exception(f"Error refreshing access token: {tokens}")

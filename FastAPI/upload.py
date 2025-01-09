@@ -1,21 +1,19 @@
 import pandas as pd
 import requests
 import json
-import base64
 import urllib.parse
 import uuid
 from datetime import datetime
-import os
 from dotenv import load_dotenv
 
 load_dotenv()
 
 # QuickBooks API Credentials
-CLIENT_ID = os.getenv('CLIENT_ID')
-CLIENT_SECRET = os.getenv('CLIENT_SECRET')
-REDIRECT_URI = "http://localhost:5000/callback"  # Set this in the Intuit Developer Portal
-AUTHORIZATION_CODE = os.getenv('AUTHORIZATION_CODE')
-REFRESH_TOKEN = os.getenv('REFRESH_TOKEN')
+# CLIENT_ID = os.getenv('CLIENT_ID')
+# CLIENT_SECRET = os.getenv('CLIENT_SECRET')
+# REDIRECT_URI = "http://localhost:5000/callback"  # Set this in the Intuit Developer Portal
+# AUTHORIZATION_CODE = os.getenv('AUTHORIZATION_CODE')
+# REFRESH_TOKEN = os.getenv('REFRESH_TOKEN')
 COMPANY_ID = "9130350083474706"  # Find this in QuickBooks
 
 # QuickBooks API Endpoints
@@ -45,48 +43,48 @@ query = """
 encoded_query = urllib.parse.quote(query.strip())
 url = f"{CUSTOMERQ_ENDPOINT}?query={encoded_query}"
 
-# Step 1: Get Access Token
-def get_access_token():
-    headers = {
-        "Authorization": "Basic " + base64.b64encode(f"{CLIENT_ID}:{CLIENT_SECRET}".encode()).decode(),
-        "Content-Type": "application/x-www-form-urlencoded"
-    }
+# # Step 1: Get Access Token
+# def get_access_token():
+#     headers = {
+#         "Authorization": "Basic " + base64.b64encode(f"{CLIENT_ID}:{CLIENT_SECRET}".encode()).decode(),
+#         "Content-Type": "application/x-www-form-urlencoded"
+#     }
     
-    data = {
-        "grant_type": "authorization_code",
-        "code": AUTHORIZATION_CODE,
-        "redirect_uri": REDIRECT_URI
-    }
+#     data = {
+#         "grant_type": "authorization_code",
+#         "code": AUTHORIZATION_CODE,
+#         "redirect_uri": REDIRECT_URI
+#     }
     
-    response = requests.post(TOKEN_ENDPOINT, headers=headers, data=data)
-    tokens = response.json()
+#     response = requests.post(TOKEN_ENDPOINT, headers=headers, data=data)
+#     tokens = response.json()
     
-    if "access_token" in tokens:
-        return tokens["access_token"], tokens["refresh_token"]
-    else:
-        raise Exception(f"Error fetching access token: {tokens}")
+#     if "access_token" in tokens:
+#         return tokens["access_token"], tokens["refresh_token"]
+#     else:
+#         raise Exception(f"Error fetching access token: {tokens}")
 
-# Step 2: Refresh Access Token
-def refresh_access_token():
-    print("entered")
-    headers = {
-        "Authorization": "Basic " + base64.b64encode(f"{CLIENT_ID}:{CLIENT_SECRET}".encode()).decode(),
-        "Content-Type": "application/x-www-form-urlencoded"
-    }
+# # Step 2: Refresh Access Token
+# def refresh_access_token():
+#     print("entered")
+#     headers = {
+#         "Authorization": "Basic " + base64.b64encode(f"{CLIENT_ID}:{CLIENT_SECRET}".encode()).decode(),
+#         "Content-Type": "application/x-www-form-urlencoded"
+#     }
     
-    data = {
-        "grant_type": "refresh_token",
-        "refresh_token": REFRESH_TOKEN
-    }
+#     data = {
+#         "grant_type": "refresh_token",
+#         "refresh_token": REFRESH_TOKEN
+#     }
     
-    response = requests.post(TOKEN_ENDPOINT, headers=headers, data=data)
-    tokens = response.json()
-    print(tokens)
+#     response = requests.post(TOKEN_ENDPOINT, headers=headers, data=data)
+#     tokens = response.json()
+#     print(tokens)
     
-    if "access_token" in tokens:
-        return tokens["access_token"], tokens["refresh_token"]
-    else:
-        raise Exception(f"Error refreshing access token: {tokens}")
+#     if "access_token" in tokens:
+#         return tokens["access_token"], tokens["refresh_token"]
+#     else:
+#         raise Exception(f"Error refreshing access token: {tokens}")
 
 # Step 3: Read the Excel File
 def read_excel(file_path):
@@ -202,9 +200,9 @@ def create_invoice(invoice, access_token):
     return response.json()
 
 # Step 6: Main Function to Process Excel and Upload
-def upload_invoices(file_path,client_name):
+def upload_invoices(file_path,client_name,accesstoken):
     # Get or refresh access token
-    access_token, refresh_token = refresh_access_token()
+    access_token = accesstoken
 
     df = read_excel(file_path)
     invoice_lines =[]

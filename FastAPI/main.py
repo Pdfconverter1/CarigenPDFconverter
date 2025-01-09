@@ -138,7 +138,7 @@ async def get_access_token():
     tokens = response.json()
     
     if "access_token" in tokens:
-        return {"accessToken":tokens["access_token"], "refeshtoken":tokens["refresh_token"], "expiryDate":tokens["expires_in"]}
+        return {"accessToken":tokens["access_token"], "refreshtoken":tokens["refresh_token"], "expiryDate":tokens["expires_in"]}
     else:
         raise Exception(f"Error fetching access token: {tokens}")
 
@@ -159,6 +159,6 @@ async def refresh(reftkn: str=""):
     print(tokens)
     
     if "access_token" in tokens:
-        return {"accessToken":tokens["access_token"], "refeshtoken":tokens["refresh_token"], "expiryDate":tokens["expires_in"]}
+        return {"accessToken":tokens["access_token"], "refreshtoken":tokens["refresh_token"], "expiryDate":tokens["expires_in"]}
     else:
         raise Exception(f"Error refreshing access token: {tokens}")

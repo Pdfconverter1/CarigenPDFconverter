@@ -38,8 +38,8 @@ query = """
         'Andrews Memorial Hospital','Biomedical Caledonia Medical Laboratory','Central Medical Labs. Ltd',
         'Consolidated Health Laboratory','Chrissie Thomlinson Memorial Hospital','Dr. Veronica Taylor Porter',
         'Fleet Diagnostic Laboratory Ltd','Gene Medical Lab','Laboratory Services and Consultation',
-        'La Falaise House Medical Labs','Medilab Service','Microlabs','Mid Island Medical Lab',
-        'Shimac Medical Laboratory','Spalding Diagnostix','Winchester Laboratory Services'
+        'La Falaise House Medical Labs','Medilab Service','Microlabs','Mid Island Medical Lab', 'QUALITECH','Quality Diagnostics',
+        'Shimac Medical Laboratory','Spalding Diagnostix','UHWI Blood Bank','Winchester Laboratory Services'
     )
 """
 encoded_query = urllib.parse.quote(query.strip())
@@ -68,6 +68,7 @@ def get_access_token():
 
 # Step 2: Refresh Access Token
 def refresh_access_token():
+    print("entered")
     headers = {
         "Authorization": "Basic " + base64.b64encode(f"{CLIENT_ID}:{CLIENT_SECRET}".encode()).decode(),
         "Content-Type": "application/x-www-form-urlencoded"
@@ -80,6 +81,7 @@ def refresh_access_token():
     
     response = requests.post(TOKEN_ENDPOINT, headers=headers, data=data)
     tokens = response.json()
+    print(tokens)
     
     if "access_token" in tokens:
         return tokens["access_token"], tokens["refresh_token"]

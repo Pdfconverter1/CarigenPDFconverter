@@ -33,6 +33,8 @@ function FolderToExcelConverter() {
         { value: 'Medilab Service', label: 'Medilab Service' },
         { value: 'Microlabs', label: 'Microlabs' },
         { value: 'Mid Island Medical Lab', label: 'Mid Island Medical Lab' },
+        { value: 'QUALITECH', label: 'QUALITECH' },
+        { value: 'Quality Diagnostics', label: 'Quality Diagnostics' },
         { value: 'Shimac Medical Laboratory', label: 'Shimac Medical Laboratory' },
         { value: 'Spalding Diagnostix', label: 'Spalding Diagnostix' },
         { value: 'Winchester Laboratory Services', label: 'Winchester Laboratory Services' },

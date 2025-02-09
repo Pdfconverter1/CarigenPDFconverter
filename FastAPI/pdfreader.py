@@ -10,7 +10,7 @@ ID = ["customername", "testpanel", "Date Reported"]
 Services = {"STI 9":"STI-9 CS","CT/NG":"CTNGT","QUAD":"QUAD CS","NEURO 9":"N9CS","CA/GV":"CA/GV CS","CANP":"CANP","SYPH":"SYPH CS","HIV QUALITATIVE":"HIV QUAL CS",
             "HPV SCREEN AND TYPING":"HPV SCREEN CS","HPV SCREEN":"HPV SCREEN CS","BACTERAIL VAGINOSIS":"BVCS","CHIK":"CHIK CS","CMV":"CMV PANEL CS","DENGUE":"DENGUE CS",
             "DENGUE/CHIK":"DENGUE/CHIK CS","DENGUE TYPE":"DENTYPE","HSV I/II":"HSV 1 & 2 CS","MTB":"MTB CS","MYCO":"MYCO CS","R21":"R21 CS","STI 11+":"STI-11+", "STI 11+ U":"STI-11+",
-            "UREA +":"UREA PLUS","UREA":"UREA PLUS","ZIK V":"ZIK V CS","TVAG":"TVAG CS"}
+            "UREA +":"UREA PLUS","UREA":"UREA PLUS","ZIK V":"ZIK V CS","TVAG":"TVAG CS","CANP CS":"Candida Panel","Respiratory 21 CS":"R21 CS","Bacterial Vaginosis CS":"BV CS","Zik V CS":"ZikV CS"}
 
 def process_pdf(pathname, filename):
     """Extract data from a single PDF."""

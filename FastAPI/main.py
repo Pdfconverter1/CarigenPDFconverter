@@ -1,6 +1,6 @@
 from fastapi import FastAPI, HTTPException, File, UploadFile,Form
 from fastapi.responses import FileResponse
-from fastapi.middleware.cors import CORSMiddleware
+from starlette.middleware.cors import CORSMiddleware
 from typing import List
 from pathlib import Path
 from pdfreader import pdfconvert
@@ -18,7 +18,7 @@ import os
 
 app = FastAPI()
 
-origins = ['http://localhost:3000', "https://pdfconverter1.github.io"]
+origins = ['http://localhost:3000', "https://pdfconverter1.github.io","https://pdfconverter1.github.io/CarigenPDFconverter/"]
 
 app.add_middleware(
     CORSMiddleware,

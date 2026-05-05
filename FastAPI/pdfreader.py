@@ -7,10 +7,10 @@ from datetime import datetime
 
 ID = ["customername", "testpanel", "Date Reported"]
 
-Services = {"STI 9":"STI-9 CS","CT/NG":"CTNGT","QUAD":"QUAD CS","NEURO 9":"N9CS","CA/GV":"CA/GV CS","CANP":"CANP","SYPH":"SYPH CS","HIV QUALITATIVE":"HIV QUAL CS",
+Services = {"STI 9":"STI-9 CS","STI 9 T":"STI-9 CS","CT/NG":"CTNGT","QUAD":"QUAD CS","NEURO 9":"N9CS","CA/GV":"CA/GV CS","SYPH":"SYPH CS","HIV QUALITATIVE":"HIV QUAL CS",
             "HPV SCREEN AND TYPING":"HPV SCREEN CS","HPV SCREEN":"HPV SCREEN CS","BACTERAIL VAGINOSIS":"BVCS","CHIK":"CHIK CS","CMV":"CMV PANEL CS","DENGUE":"DENGUE CS",
-            "DENGUE/CHIK":"DENGUE/CHIK CS","DENGUE TYPE":"DENTYPE","HSV I/II":"HSV 1 & 2 CS","MTB":"MTB CS","MYCO":"MYCO CS","R21":"R21 CS","STI 11+":"STI-11+", "STI 11+ U":"STI-11+",
-            "UREA +":"UREA PLUS","UREA":"UREA PLUS","ZIK V":"ZIK V CS","TVAG":"TVAG CS","CANP CS":"Candida Panel","Respiratory 21 CS":"R21 CS","Bacterial Vaginosis CS":"BV CS","Zik V CS":"ZikV CS"}
+            "DENGUE/CHIK":"DENGUE/CHIK CS","DENGUE TYPE":"DENTYPE","HSV I/II":"HSV 1 & 2 CS","MTB":"MTB CS","MYCO":"MYCO CS","R21":"R21 CS","STI 11+":"STI-11+", "STI 11+ U":"STI-11+", "STI 11+T":"STI-11+",
+            "UREA +":"UREA PLUS","UREA":"UREA PLUS","ZIK V":"ZIK V CS","TVAG":"TVAG CS","CANP":"Candida Panel","Respiratory 21 CS":"R21 CS","Bacterial Vaginosis CS":"BV CS","Zik V CS":"ZikV CS"}
 
 def process_pdf(pathname, filename):
     """Extract data from a single PDF."""
@@ -27,6 +27,9 @@ def process_pdf(pathname, filename):
         for line in lines:
            temp = line.split(":",1)
            if len(temp) > 1:
+            for i in range(len(temp)):
+                if "\xa0" in temp[i]:
+                    temp[i] = temp[i].replace("\xa0"," ")  
             temp[0] = temp[0].replace(" ","")
             temp2 = temp[0].lower() + ":" + temp[1]
             if any(id_ in temp2 for id_ in ID):

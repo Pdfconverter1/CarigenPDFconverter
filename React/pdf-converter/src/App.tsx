@@ -43,10 +43,10 @@ const  App = ()  => {
         { value: 'Mid Island Medical Lab', label: 'Mid Island Medical Lab' },
         { value: 'QUALITECH', label: 'QUALITECH' },
         { value: 'Quality Diagnostics', label: 'Quality Diagnostics' },
+        { value: 'Royal Winchester Medical Lab', label: 'Royal Winchester Medical Lab' },
         { value: 'Shimac Medical Laboratory', label: 'Shimac Medical Laboratory' },
         { value: 'Spalding Diagnostix', label: 'Spalding Diagnostix' },
         { value: 'UHWI Blood Bank', label: 'UHWI Blood Bank' },
-        { value: 'Winchester Laboratory Services', label: 'Winchester Laboratory Services' },
     ];
 
     const handleFolderChange = (event: React.ChangeEvent<HTMLInputElement>) => {
